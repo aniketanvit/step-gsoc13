@@ -1,0 +1,2 @@
+This repository is for the addition of Friction force, fixed planes and Pulley-Cord Objects in 
+STEP.
