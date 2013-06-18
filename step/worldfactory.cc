@@ -45,6 +45,7 @@
 #include "motorgraphics.h"
 #include "jointgraphics.h"
 #include "toolgraphics.h"
+#include "frictionforce.h"
 
 #include <KIcon>
 #include <KIconLoader>
@@ -133,6 +134,7 @@ WorldFactory::WorldFactory()
     __REGISTER_EXT(LinearMotor, LinearMotorCreator, LinearMotorGraphicsItem, ItemMenuHandler);
     __REGISTER_EXT(CircularMotor, CircularMotorCreator, CircularMotorGraphicsItem, ItemMenuHandler);
 
+    __REGISTER(FrictionForce,FrictionForceCreator, NULL, FrictionForceMenuHandler);
     __REGISTER_E(WeightForce);
     __REGISTER_E(GravitationForce);
     __REGISTER_E(CoulombForce);
@@ -191,6 +193,7 @@ WorldFactory::WorldFactory()
     __ADD_TO_PALETTE(SoftBody);
     __ADD_SEPARATOR;
 
+    __ADD_TO_PALETTE(FrictionForce);
     __ADD_TO_PALETTE(WeightForce);
     __ADD_TO_PALETTE(GravitationForce);
     __ADD_TO_PALETTE(CoulombForce);

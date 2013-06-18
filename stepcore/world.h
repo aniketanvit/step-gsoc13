@@ -30,6 +30,7 @@
 
 #include <vector> // XXX: replace if QT is enabled
 #include <QHash>
+#include <QPair>
 
 // TODO: split this file
 
@@ -42,6 +43,7 @@ class Item;
 class ItemGroup;
 class CollisionSolver;
 class ConstraintSolver;
+class RigidBody;
 
 /** \ingroup errors
  *  \brief Base class for all errors objects
@@ -208,6 +210,19 @@ public:
      */
     virtual void calcForce(bool calcVariances) = 0;
 };
+
+class FrictionForce : public Object
+{
+  STEPCORE_OBJECT(FrictionForce)
+  
+public:
+  
+  FrictionForce();
+  ~FrictionForce();
+  
+  static QHash< QPair<Body*, Body*>, QPair<double, double> > _frictionHash;
+};
+
 
 /** \ingroup joints
  *  Constraints information structure
