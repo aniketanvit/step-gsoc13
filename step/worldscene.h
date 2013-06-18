@@ -162,6 +162,8 @@ protected slots:
     void messageLinkActivated(const QString& link);
 
     void snapUpdateToolTip();
+    
+    void toggleFrameChange();
 
 protected:
     bool event(QEvent* event);
@@ -185,6 +187,8 @@ protected:
     QPointF            _snapPos;
     QString            _snapToolTip;
     QTimer*            _snapTimer;
+    
+    bool doFrameChange;
 
     friend class WorldGraphicsView;
 };

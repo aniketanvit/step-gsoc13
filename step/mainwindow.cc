@@ -31,6 +31,7 @@
 #include "itempalette.h"
 #include "settings.h"
 #include "unitscalc.h"
+#include "worldgraphics.h"
 
 #include <stepcore/solver.h>
 #include <stepcore/collisionsolver.h>
@@ -171,10 +172,13 @@ void MainWindow::setupActions()
     actionDownloadExamples->setIcon(KIcon("get-hot-new-stuff"));
 
     /* Edit menu */
+    KAction* frameChange = actionCollection()->add<KAction>("change_frame_of_view", this->worldScene, SLOT(toggleFramChange()));
     actionRedo = KStandardAction::redo(worldModel->undoStack(), SLOT(redo()), actionCollection());
     actionUndo = KStandardAction::undo(worldModel->undoStack(), SLOT(undo()), actionCollection());
     actionRedo->setEnabled(false); actionUndo->setEnabled(false);
     actionRedo->setIconText(i18n("Redo")); actionUndo->setIconText(i18n("Undo"));
+    frameChange->setEnabled(true);
+    frameChange->setIconText(i18n("change view"));
     connect(worldModel->undoStack(), SIGNAL(canRedoChanged(bool)), actionRedo, SLOT(setEnabled(bool)));
     connect(worldModel->undoStack(), SIGNAL(canUndoChanged(bool)), actionUndo, SLOT(setEnabled(bool)));
     connect(worldModel->undoStack(), SIGNAL(cleanChanged(bool)), this, SLOT(updateCaption()));
@@ -653,3 +657,14 @@ void MainWindow::on_actionAboutStep_triggered(bool checked)
                 "(C) 2006-2007 Kuznetsov Vladimir.</center>"));
 }
 */
+
+/*
+void MainWindow::pointofview() {
+  QModelIndex selectedItem = worldModel->selectionModel()->currentIndex();
+  WorldGraphicsItem* centerItem = worldScene->graphicsFromItem(worldModel->item(selectedItem));
+ //QGraphicsItem* g = static_cast<QGraphicsItem*>(centerItem);
+  worldGraphicsView->centerOn(centerItem->x(), centerItem->y());
+} */
+
+
+

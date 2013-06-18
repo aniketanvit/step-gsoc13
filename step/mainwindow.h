@@ -38,6 +38,7 @@ class KRecentFilesAction;
 
 class QItemSelection;
 class QActionGroup;
+class WorldGraphicsView;
 
 class MainWindow : public KXmlGuiWindow
 {
@@ -74,8 +75,7 @@ public slots:
     void setSlowestSpeed()  { setRunSpeed(3); }
     void setStepSpeed()     { setRunSpeed(4); }
 
-
-protected slots:
+   protected slots:
     void updateCaption();
     void undoTextChanged(const QString& undoText);
     void redoTextChanged(const QString& redoText);
@@ -117,6 +117,8 @@ protected:
     KAction* actionCut;
     KAction* actionCopy;
     KAction* actionPaste;
+    
+    //KAction* frameChange;
 
     KRecentFilesAction* actionRecentFiles;
 
