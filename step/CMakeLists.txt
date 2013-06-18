@@ -11,7 +11,6 @@ set(step_SRCS
     undobrowser.cc
     itempalette.cc
     worldfactory.cc
-    frictionforce.cc
     particlegraphics.cc
     polygongraphics.cc
     gasgraphics.cc
@@ -30,7 +29,6 @@ set(step_SRCS
 set(step_UIS
     create_gas_particles.ui
     create_softbody_items.ui
-    create_friction_force.ui
     configure_graph.ui
     configure_meter.ui
     configure_controller.ui
