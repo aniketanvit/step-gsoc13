@@ -30,7 +30,7 @@
 namespace StepCore {
 
 class Particle;
-class ChargedParticle;
+//class ChargedParticle;
 
 /** \ingroup errors
  *  \brief Errors object for Particle
@@ -88,8 +88,14 @@ public:
     double kineticEnergyVariance() const;
     /** Set kinetic energy variance (will modify velocity variance) */
     void setKineticEnergyVariance(double kineticEnergyVariance);
+    
+    double chargeVariance() { return _chargeVariance; }
+    
+    void setChargeVariance(double chargeVar) {_chargeVariance = chargeVar; }
 
 protected:
+  
+    double _chargeVariance;
     Vector2d _positionVariance;
     Vector2d _velocityVariance;
     Vector2d _forceVariance;
@@ -160,6 +166,9 @@ public:
     void getInverseMass(VectorXd* inverseMass,
                         DynSparseRowMatrix* variance, int offset);
 
+    double charge() { return _charge; }
+    
+    void setCharge(double charge) { _charge = charge; }
     /** Get (and possibly create) ParticleErrors object */
     ParticleErrors* particleErrors() {
         return static_cast<ParticleErrors*>(objectErrors()); }
@@ -167,6 +176,7 @@ public:
 protected:
     ObjectErrors* createObjectErrors() { return new ParticleErrors(this); }
 
+    double _charge;
     Vector2d _position;
     Vector2d _velocity;
     Vector2d _force;
@@ -176,6 +186,7 @@ protected:
 /** \ingroup errors
  *  \brief Errors object for ChargedParticle
  */
+#if 0
 class ChargedParticleErrors: public ParticleErrors
 {
     STEPCORE_OBJECT(ChargedParticleErrors)
@@ -227,8 +238,8 @@ protected:
 
     double _charge;
 };
+#endif
 
 } // namespace StepCore
-
 #endif
 

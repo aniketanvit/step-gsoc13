@@ -40,7 +40,8 @@ STEPCORE_META_OBJECT(RigidBody, QT_TRANSLATE_NOOP("ObjectClass", "RigidBody"), Q
         STEPCORE_PROPERTY_R_D(double, torque, QT_TRANSLATE_NOOP("PropertyName", "torque"), QT_TRANSLATE_NOOP("Units", "N m"), QT_TR_NOOP("Torque that acts upon the body"), torque)
 
         STEPCORE_PROPERTY_RW(double, mass, QT_TRANSLATE_NOOP("PropertyName", "mass"), QT_TRANSLATE_NOOP("Units", "kg"), QT_TR_NOOP("Total mass of the body"), mass, setMass)
-        STEPCORE_PROPERTY_RW(double, inertia, QT_TRANSLATE_NOOP("PropertyName", "inertia"), STEPCORE_FROM_UTF8(QT_TRANSLATE_NOOP("Units", "kg m²")),
+	STEPCORE_PROPERTY_RW(double, charge, QT_TRANSLATE_NOOP("PropertyName", "charge"), QT_TRANSLATE_NOOP("Units", "C"), QT_TR_NOOP("Total charge on the body"), charge, setCharge)
+	STEPCORE_PROPERTY_RW(double, inertia, QT_TRANSLATE_NOOP("PropertyName", "inertia"), STEPCORE_FROM_UTF8(QT_TRANSLATE_NOOP("Units", "kg m²")),
                                     QT_TR_NOOP("Inertia \"tensor\" of the body"), inertia, setInertia)
         STEPCORE_PROPERTY_RWF(StepCore::Vector2d, momentum, QT_TRANSLATE_NOOP("PropertyName", "momentum"), QT_TRANSLATE_NOOP("Units", "kg m/s"), QT_TR_NOOP("momentum"),
                         StepCore::MetaProperty::DYNAMIC, momentum, setMomentum)
@@ -70,7 +71,9 @@ STEPCORE_META_OBJECT(RigidBodyErrors, QT_TRANSLATE_NOOP("ObjectClass", "RigidBod
 
         STEPCORE_PROPERTY_RW(double, massVariance, QT_TRANSLATE_NOOP("PropertyName", "massVariance"), QT_TRANSLATE_NOOP("Units", "kg"),
                     QT_TR_NOOP("mass variance"), massVariance, setMassVariance )
-        STEPCORE_PROPERTY_RW(double, inertiaVariance, QT_TRANSLATE_NOOP("PropertyName", "inertiaVariance"), STEPCORE_FROM_UTF8(QT_TRANSLATE_NOOP("Units", "kg m²")),
+	STEPCORE_PROPERTY_RW(double, chargeVariance, QT_TRANSLATE_NOOP("PropertyName", "chargeVariance"), QT_TRANSLATE_NOOP("Units", "C"),
+		    QT_TR_NOOP("charge variance"), chargeVariance, setChargeVariance )
+	STEPCORE_PROPERTY_RW(double, inertiaVariance, QT_TRANSLATE_NOOP("PropertyName", "inertiaVariance"), STEPCORE_FROM_UTF8(QT_TRANSLATE_NOOP("Units", "kg m²")),
                     QT_TR_NOOP("inertia variance"), inertiaVariance, setInertiaVariance )
         STEPCORE_PROPERTY_RWF(StepCore::Vector2d, momentumVariance, QT_TRANSLATE_NOOP("PropertyName", "momentumVariance"), QT_TRANSLATE_NOOP("Units", "kg m/s"),
                     QT_TR_NOOP("momentum variance"), StepCore::MetaProperty::DYNAMIC, momentumVariance, setMomentumVariance)
@@ -96,6 +99,16 @@ STEPCORE_META_OBJECT(Plane, QT_TRANSLATE_NOOP("ObjectClass", "Plane"), QT_TR_NOO
         STEPCORE_PROPERTY_RW_D(StepCore::Vector2d, point1, QT_TRANSLATE_NOOP("PropertyName", "point1"), QT_TRANSLATE_NOOP("Units", "m"), QT_TR_NOOP("First point which defines the plane"), point1, setPoint1),
         STEPCORE_PROPERTY_RW_D(StepCore::Vector2d, point2, QT_TRANSLATE_NOOP("PropertyName", "point2"), QT_TRANSLATE_NOOP("Units", "m"), QT_TR_NOOP("Second point which defines the plane"), point2, setPoint2))
 #endif
+
+void RigidBody::findCenterOfCharge()
+{
+  
+  /**
+   * 
+   * to be implemented correctly soon
+   * 
+   */return;
+}
 
 RigidBody* RigidBodyErrors::rigidBody() const
 {

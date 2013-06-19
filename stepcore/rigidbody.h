@@ -43,7 +43,7 @@ public:
     RigidBodyErrors(Item* owner = 0)
         : ObjectErrors(owner), _positionVariance(0,0), _angleVariance(0), _velocityVariance(0,0),
           _angularVelocityVariance(0), _forceVariance(0,0), _torqueVariance(0),
-          _massVariance(0), _inertiaVariance(0) {}
+          _massVariance(0), _inertiaVariance(0), _chargeVariance(0) {}
 
     /** Get owner as RigidBody */
     RigidBody* rigidBody() const;
@@ -122,6 +122,9 @@ public:
     /** Set kinetic energy variance (will modify velocity variance) */
     void setKineticEnergyVariance(double kineticEnergyVariance);
 
+    double chargeVariance() { return _chargeVariance; }
+    void setChargevariance(double chargeVar) { _chargeVariance = chargeVar ;}
+    
 protected:
     Vector2d _positionVariance;
     double   _angleVariance;
@@ -134,6 +137,8 @@ protected:
 
     double _massVariance;
     double _inertiaVariance;
+    
+    double _chargeVariance;
 
     friend class RigidBody;
 };
@@ -154,12 +159,12 @@ public:
     /** Constructs RigidBody */
     explicit RigidBody(Vector2d position = Vector2d::Zero(), double angle = 0,
               Vector2d velocity = Vector2d::Zero(), double angularVelocity = 0,
-              double mass = 1, double inertia = 1);
+              double mass = 1, double inertia = 1, double charge = 10);
 
     /** Get position of the center of mass of the body  */
     const Vector2d& position() const { return _position; }
     /** Set position of the center of mass of the body */
-    void setPosition(const Vector2d& position) { _position = position; }
+    void setPosition(const Vector2d& position) { _position = position; _centerOfCharge = position; } // XXX will be corrected later
 
     /** Get angle of the body */
     double angle() const { return _angle; }
@@ -260,6 +265,12 @@ public:
     /** Get (and possibly create) RigidBodyErrors object */
     RigidBodyErrors* rigidBodyErrors() {
         return static_cast<RigidBodyErrors*>(objectErrors()); }
+        
+    double charge() { return _charge; }
+    
+    void setCharge(double charge) { _charge = charge; }
+    
+    void findCenterOfCharge();
 
 protected:
     ObjectErrors* createObjectErrors() { return new RigidBodyErrors(this); }
@@ -275,7 +286,10 @@ protected:
 
     double   _mass;
     double   _inertia;
-
+    
+    double _charge;
+    Vector2d _centerOfCharge;        //just like Center of mass but it is for charge
+                                     // will be found out after integration of the charge-distribution.
     friend class RigidBodyErrors;
 };
 
