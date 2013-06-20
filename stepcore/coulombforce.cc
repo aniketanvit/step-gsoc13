@@ -56,8 +56,8 @@ void CoulombForce::calcForce(bool calcVariances)
 	  if((*b1)->metaObject()->inherits<Particle>()) {
 	    if((*b2)->metaObject()->inherits<Particle>()) {
 	      
-	      Particle* p1 = static_cast<ChargedParticle*>(*b1);
-	      Particle* p2 = static_cast<ChargedParticle*>(*b2);
+	      Particle* p1 = static_cast<Particle*>(*b1);
+	      Particle* p2 = static_cast<Particle*>(*b2);
 	      
 	      Vector2d r = p2->position() - p1->position();
 	      double rnorm2 = r.squaredNorm();
@@ -68,8 +68,8 @@ void CoulombForce::calcForce(bool calcVariances)
 	      
 	      if(calcVariances) {
 		// XXX: CHECKME
-		ChargedParticleErrors* pe1 = p1->chargedParticleErrors();
-		ChargedParticleErrors* pe2 = p2->chargedParticleErrors();
+		ParticleErrors* pe1 = p1->particleErrors();
+		ParticleErrors* pe2 = p2->particleErrors();
 		Vector2d rV = pe2->positionVariance() + pe1->positionVariance();
 		Vector2d forceV = force.cwise().square().cwise()* (
 		  Vector2d(coulombForceErrors()->_coulombConstVariance / square(_coulombConst) +
@@ -91,12 +91,12 @@ void CoulombForce::calcForce(bool calcVariances)
 	      Vector2d force = _coulombConst* p1->charge() * r2->charge() * r / (rnorm2*sqrt(rnorm2));
 	      p1->applyForce(force);
 	      force = -force;
-	      r2->applyForce(force, r2->position);
+	      r2->applyForce(force, r2->position());
 	      
 	      if(calcVariances) {
 		// XXX: CHECKME
-		ParticleErrors* pe1 = p1->ParticleErrors();
-		RigidBodyErrors* re2 = r2->RigidBodyErrors();
+		ParticleErrors* pe1 = p1->particleErrors();
+		RigidBodyErrors* re2 = r2->rigidBodyErrors();
 		Vector2d rV = re2->positionVariance() + pe1->positionVariance();
 		Vector2d forceV = force.cwise().square().cwise()* (
 		  Vector2d(coulombForceErrors()->_coulombConstVariance / square(_coulombConst) +
@@ -122,21 +122,21 @@ void CoulombForce::calcForce(bool calcVariances)
 	     Vector2d force = _coulombConst* r1->charge() * p2->charge() * r / (rnorm2*sqrt(rnorm2));
 	     r1->applyForce(force, r1->position());
 	     force = -force;
-	     r2->applyForce(force);
+	     p2->applyForce(force);
 	     
 	     if(calcVariances) {
 	       // XXX: CHECKME
-	       RigidBodyErrors* re1 = r1->ParticleErrors();
-	       RigidBodyErrors* pe2 = p2->RigidBodyErrors();
+	       RigidBodyErrors* re1 = r1->rigidBodyErrors();
+	       ParticleErrors* pe2 = p2->particleErrors();
 	       Vector2d rV = re1->positionVariance() + pe2->positionVariance();
 	       Vector2d forceV = force.cwise().square().cwise()* (
 		 Vector2d(coulombForceErrors()->_coulombConstVariance / square(_coulombConst) +
-		 pe1->chargeVariance() / square(p2->charge()) +
-		 re2->chargeVariance() / square(r1->charge())) +
+		 re1->chargeVariance() / square(p2->charge()) +
+		 pe2->chargeVariance() / square(r1->charge())) +
 		 Vector2d(rV[0] * square(1/r[0] - 3*r[0]/rnorm2) + rV[1] * square(3*r[1]/rnorm2),
 			  rV[1] * square(1/r[1] - 3*r[1]/rnorm2) + rV[0] * square(3*r[0]/rnorm2)));
-	       pe1->applyForceVariance(forceV);
-	       re1->applyForceVariance(-force, r1->position(), forceV, re1->positionVariance());
+	       re1->applyForceVariance(-force,  r1->position(), forceV, re1->positionVariance());
+	       pe2->applyForceVariance(forceV);
 	     }
 	      
 	   }else if((*b2)->metaObject()->inherits<RigidBody>()) {
@@ -144,18 +144,18 @@ void CoulombForce::calcForce(bool calcVariances)
 	     RigidBody* r1 = static_cast<RigidBody*>(*b1);
 	     RigidBody* r2 = static_cast<RigidBody*>(*b2);
 	     
-	     Vector2d r = p2->position() - p1->position();
+	     Vector2d r = r2->position() - r1->position();
 	     double rnorm2 = r.squaredNorm();
-	     Vector2d force = _coulombConst* p1->charge() * p2->charge() * r / (rnorm2*sqrt(rnorm2));
-	     p2->applyForce(force);
+	     Vector2d force = _coulombConst* r1->charge() * r2->charge() * r / (rnorm2*sqrt(rnorm2));
+	     r2->applyForce(force, r2->position());
 	     force = -force;
-	     p1->applyForce(force);
+	     r1->applyForce(-force, r1->position());
 	     
 	     if(calcVariances) {
 	       // XXX: CHECKME
-	       RigidBodyErrors* re1 = r1->RigidBodyErrors();
-	       RigidBodyErrors* re2 = p2->RigidBodyErrors();
-	       Vector2d rV = pe2->positionVariance() + pe1->positionVariance();
+	       RigidBodyErrors* re1 = r1->rigidBodyErrors();
+	       RigidBodyErrors* re2 = r2->rigidBodyErrors();
+	       Vector2d rV = re2->positionVariance() + re1->positionVariance();
 	       Vector2d forceV = force.cwise().square().cwise()* (
 		 Vector2d(coulombForceErrors()->_coulombConstVariance / square(_coulombConst) +
 		 re1->chargeVariance() / square(r1->charge()) +
