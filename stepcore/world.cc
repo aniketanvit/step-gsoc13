@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <cmath>
 #include <QtGlobal>
+#include <QPair>
 
 namespace StepCore
 {
@@ -47,6 +48,13 @@ STEPCORE_META_OBJECT(World, QT_TRANSLATE_NOOP("ObjectClass", "World"), QT_TR_NOO
         STEPCORE_PROPERTY_RW  (bool, errorsCalculation, QT_TR_NOOP("errorsCalculation"), STEPCORE_UNITS_NULL,
                         QT_TR_NOOP("Enable global error calculation"), errorsCalculation, setErrorsCalculation))
 
+
+void World::fillFrictionHash()
+{
+  _frictionHash.insert(qMakePair(_body1, _body2), qMakePair(_frCoeff, _rrCoeff));
+  _frictionHash.inset(qMakePair(_body2, _body1), qMakePair(_frCoeff, _rrCoeff));
+  
+}
 Item& Item::operator=(const Item& item)
 {
     Object::operator=(item);

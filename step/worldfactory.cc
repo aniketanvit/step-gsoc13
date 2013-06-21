@@ -37,6 +37,7 @@
 #include <stepcore/tool.h>
 #include <stepcore/types.h>
 
+#include "frictionforce.h"
 #include "particlegraphics.h"
 #include "polygongraphics.h"
 #include "gasgraphics.h"
@@ -117,6 +118,7 @@ WorldFactory::WorldFactory()
     __REGISTER_EXT_E(Particle, ItemCreator, ParticleGraphicsItem, ItemMenuHandler);
     __REGISTER_EXT_E(ChargedParticle, ItemCreator, ParticleGraphicsItem, ItemMenuHandler);
 
+    __REGISTER_EXT(FrictionForce, FrictionForceCreator, FrictionForceGraphicsItem, FrictionForceMenuHandler);
     __REGISTER_EXT(Disk, DiskCreator, DiskGraphicsItem, ItemMenuHandler);
     __REGISTER_EXT(Box, BoxCreator, BoxGraphicsItem, ItemMenuHandler);
     __REGISTER_EXT(Polygon, PolygonCreator, PolygonGraphicsItem, ItemMenuHandler);
@@ -183,6 +185,7 @@ WorldFactory::WorldFactory()
     __ADD_TO_PALETTE(Polygon);
     __ADD_SEPARATOR;
 
+    __ADD_TO_PALETTE(FrictionForce);
     __ADD_TO_PALETTE(Spring);
     __ADD_TO_PALETTE(LinearMotor);
     __ADD_TO_PALETTE(CircularMotor);

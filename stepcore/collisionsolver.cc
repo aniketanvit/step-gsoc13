@@ -19,6 +19,7 @@
 #include "collisionsolver.h"
 #include "rigidbody.h"
 #include "particle.h"
+#include "world.h"
 
 #include <algorithm>
 #include <QtGlobal>
@@ -936,15 +937,36 @@ void GJKCollisionSolver::getContactsInfo(ConstraintsInfo& info, bool collisions)
                 // jacobianDerivative is special in this case: it is not really
                 // a derivative, but rather just an expression that should be in
                 // constraint equation
+					
+		/**
+		 * This is where the coefficient of restitution (or bounceness) will be fed.
+		 * Since the outermost loop is looping through contacts present in the 
+		 * contactValueList, we shall check the bodies present in the contact (i.e.
+		 * contact->body0, contact->body1)
+		 * Then we shall try to find the bounceness-coefficient for that pair of bodies from the 
+		 * FrictionForce::_frictionHash.
+		 * If there is a match then the retrieved values will be applied otherwise 
+		 * elastic-collision will be assumed i.e the user hasn't set any coefficients for that 
+		 * pair of bodies
+		 */
+		double b;/*
+		QPair<Body*, Body*> pair1 = qMakePair(contact.body0, contact.body1);
+		if(FrictionForce::_frictionHash.contains(pair1)) {
+		  QPair<double, double> pair2 = FrictionForce::_frictionHash.value(pair1);
+		 b = pair2.second;
+		}
+		else {*/
+		  b = 1;// }
+		
                 info.jacobianDerivative.coeffRef(i, contact.body0->variablesOffset() +
-                                        RigidBody::PositionOffset) = ( -2*contact.normal[0]);
+                                        RigidBody::PositionOffset) = ( -(1+b)*contact.normal[0]);
                 info.jacobianDerivative.coeffRef(i, contact.body0->variablesOffset() +
-                                        RigidBody::PositionOffset+1) = ( -2*contact.normal[1]);
+                                        RigidBody::PositionOffset+1) = ( -(1+b)*contact.normal[1]);
                 info.jacobianDerivative.coeffRef(i, contact.body1->variablesOffset() +
-                                        RigidBody::PositionOffset) = ( 2*contact.normal[0]);
+                                        RigidBody::PositionOffset) = ( (1+b)*contact.normal[0]);
                 info.jacobianDerivative.coeffRef(i, contact.body1->variablesOffset() +
-                                        RigidBody::PositionOffset+1) = ( 2*contact.normal[1]);
-
+                                        RigidBody::PositionOffset+1) = ( (1+b)*contact.normal[1]);
+                
                 if(contact.body0->metaObject()->inherits<RigidBody>()) {
                     Vector2d r = static_cast<RigidBody*>(contact.body0)->position() - contact.points[p];
                     double rn = r[0]*contact.normal[1] - r[1]*contact.normal[0];
