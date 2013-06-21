@@ -28,6 +28,7 @@ set(step_SRCS
 
 set(step_UIS
     create_gas_particles.ui
+    create_rigidbody_items.ui
     create_softbody_items.ui
     configure_graph.ui
     configure_meter.ui

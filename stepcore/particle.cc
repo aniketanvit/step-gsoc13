@@ -53,15 +53,7 @@ namespace StepCore
 																						     QT_TR_NOOP("momentum variance"), StepCore::MetaProperty::DYNAMIC, momentumVariance, setMomentumVariance)
 						STEPCORE_PROPERTY_RWF(double, kineticEnergyVariance, QT_TRANSLATE_NOOP("PropertyName", "kineticEnergyVariance"), QT_TRANSLATE_NOOP("Units", "J"),
 																						   QT_TR_NOOP("kinetic energy variance"), StepCore::MetaProperty::DYNAMIC, kineticEnergyVariance, setKineticEnergyVariance))
-						/*
-						STEPCORE_META_OBJECT(ChargedParticle, QT_TRANSLATE_NOOP("ObjectClass", "ChargedParticle"), QT_TR_NOOP("Charged zero-size particle"), 0, STEPCORE_SUPER_CLASS(Particle),
-													     STEPCORE_PROPERTY_RW(double, charge, QT_TRANSLATE_NOOP("PropertyName", "charge"), QT_TRANSLATE_NOOP("Units", "C"), QT_TR_NOOP("charge"), charge, setCharge))
-						
-						STEPCORE_META_OBJECT(ChargedParticleErrors, QT_TRANSLATE_NOOP("ObjectClass", "ChargedParticleErrors"), QT_TR_NOOP("Errors class for ChargedParticle"), 0,
-								      STEPCORE_SUPER_CLASS(ParticleErrors),
-								      STEPCORE_PROPERTY_RW(double, chargeVariance, QT_TRANSLATE_NOOP("PropertyName", "chargeVariance"), QT_TRANSLATE_NOOP("Units", "kg"),
-								       QT_TR_NOOP("charge variance"), chargeVariance, setChargeVariance ))
-						*/
+					
 						Particle* ParticleErrors::particle() const
 						{
 						  return static_cast<Particle*>(owner());
@@ -101,12 +93,7 @@ namespace StepCore
 												    _velocityVariance.setZero();
 												    }
 						}
-						/*
-						ChargedParticle* ChargedParticleErrors::chargedParticle() const
-						{
-						  return static_cast<ChargedParticle*>(owner());
-						}
-						*/
+						
 						Particle::Particle(Vector2d position, Vector2d velocity, double mass)
 						: _position(position), _velocity(velocity), _force(Vector2d::Zero()), _mass(mass)
 						{

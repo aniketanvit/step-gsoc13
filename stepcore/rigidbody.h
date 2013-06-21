@@ -266,6 +266,11 @@ public:
     RigidBodyErrors* rigidBodyErrors() {
         return static_cast<RigidBodyErrors*>(objectErrors()); }
         
+        
+    double massDensity() { return _massDensity; }
+    
+    void setMassDensity(double massDensity) { _massDensity = massDensity; }
+    
     double charge() { return _charge; }
     
     void setCharge(double charge) { _charge = charge; }
@@ -283,7 +288,8 @@ protected:
 
     Vector2d _force;
     double   _torque;
-
+    
+    double _massDensity;
     double   _mass;
     double   _inertia;
     

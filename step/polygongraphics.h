@@ -15,7 +15,7 @@
    along with Step; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-
+#include "ui_create_rigidbody_items.h"
 #ifndef STEP_POLYGONGRAPHICS_H
 #define STEP_POLYGONGRAPHICS_H
 
@@ -93,6 +93,33 @@ public:
 protected:
     OnHoverHandlerGraphicsItem* createOnHoverHandler(const QPointF& pos);
     StepCore::Disk* disk() const;
+};
+
+class Ui::WidgetCreateRigidBodyItems;
+
+class RigidBodyKDialog;
+
+class RigidBodyMenuHandler : public ItemMenuHandler
+{
+  Q_OBJECT
+  
+public:
+  RigidBodyMenuHandler(StepCore::Object* object, WorldModel* worldModel, QObject* parent = 0) :
+            ItemMenuHandler(object, worldModel, parent){}
+            
+  void populateMenu(QMenu* menu, KActionCollection* actions);
+  
+public slots:
+  void setupDialog();
+protected slots:
+  bool createRigidBodyApply();
+protected:
+  
+  Ui::WidgetCreateRigidBodyItems*    _createRigidBodyUi;
+  RigidBodyKDialog*                        _createRigidBodyDialog;
+  
+  friend class RigidBodyKDialog;
+  
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////

@@ -15,8 +15,10 @@
    along with Step; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
+#include "ui_create_rigidbody_items.h"
 
 #include "polygongraphics.h"
+#include "polygongraphics.moc"
 
 #include <stepcore/rigidbody.h>
 
@@ -31,8 +33,11 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QKeyEvent>
 #include <QPainter>
+#include <KDialog>
 #include <KLocale>
 #include <KDebug>
+
+#include <float.h>
 
 RigidBodyGraphicsItem::RigidBodyGraphicsItem(StepCore::Item* item, WorldModel* worldModel)
     : WorldGraphicsItem(item, worldModel)
@@ -188,6 +193,14 @@ bool DiskCreator::sceneEvent(QEvent* event)
         StepCore::Disk* disk = static_cast<StepCore::Disk*>(_item);
         double radius = (pos - disk->position()).norm();
         if(radius == 0) radius = 0.5;
+	/*
+	 * show the dialog here
+	 */
+	
+	RigidBodyMenuHandler* menuHandler = new RigidBodyMenuHandler(_item, _worldModel, NULL);
+	menuHandler->setupDialog();
+	menuHandler->deleteLater();
+	
         double inertia = disk->mass() * radius*radius/2.0;
         _worldModel->setProperty(_item, "radius", QVariant::fromValue(radius));
         _worldModel->setProperty(_item, "inertia", QVariant::fromValue(inertia));
@@ -267,6 +280,72 @@ OnHoverHandlerGraphicsItem* DiskGraphicsItem::createOnHoverHandler(const QPointF
     return 0;
 }
 
+class RigidBodyKDialog : public KDialog
+{
+public:
+  RigidBodyKDialog(RigidBodyMenuHandler* handler, QWidget *parent=0, Qt::WFlags flags=0)
+  : KDialog(parent, flags), _handler(handler) {}
+  
+protected slots:
+  void slotButtonClicked(int button) {
+    if(button == KDialog::Ok) {
+      if(_handler->createRigidBodyApply()) accept();
+    } else {
+      KDialog::slotButtonClicked(button);
+    }
+  }
+      RigidBodyMenuHandler* _handler;
+};
+
+void RigidBodyMenuHandler::populateMenu(QMenu* menu, KActionCollection* actions)
+{
+  _createRigidBodyUi = 0;
+  _createRigidBodyDialog = 0;
+    
+  menu->addAction(KIcon("step_object_Disk"), i18n("Create Disk..."), this, SLOT(cr()));
+  menu->addSeparator();
+  ItemMenuHandler::populateMenu(menu, actions);
+
+}
+
+void RigidBodyMenuHandler::setupDialog()
+{
+  if(_worldModel->isSimulationActive())
+    _worldModel->simulationStop();
+  
+  _createRigidBodyDialog = new RigidBodyKDialog(this); // XXX: parent?
+  
+  _createRigidBodyDialog->setCaption(i18n("Create Disk"));
+  _createRigidBodyDialog->setButtons(KDialog::Ok | KDialog::Cancel);
+  
+  _createRigidBodyUi= new Ui::WidgetCreateRigidBodyItems;
+  _createRigidBodyUi->setupUi(_createRigidBodyDialog);
+  
+  _createRigidBodyUi->_massLineEdit->setValidator(
+    new QDoubleValidator(0, HUGE_VAL, DBL_DIG, _createRigidBodyUi->_massLineEdit));
+  _createRigidBodyUi->_chargeLineEdit->setValidator(
+    new QDoubleValidator(0, HUGE_VAL, DBL_DIG, _createRigidBodyUi->_chargeLineEdit));
+    
+    connect(_createRigidBodyDialog, SIGNAL(okClicked()), this, SLOT(createRigidBodyApply()));
+    
+    _createRigidBodyDialog->exec();
+    
+    delete _createRigidBodyDialog; _createRigidBodyDialog = 0;
+    delete _createRigidBodyUi; _createRigidBodyUi = 0;
+}
+
+
+bool RigidBodyMenuHandler::createRigidBodyApply()
+{
+  
+  
+  return true;
+  
+  
+  
+}
+
+
 /////////////////////////////////////////////////////////////////////////////////////////
 
 void BoxCreator::start()
@@ -321,6 +400,11 @@ bool BoxCreator::sceneEvent(QEvent* event)
         _worldModel->setProperty(_item, "position", QVariant::fromValue(position));
         _worldModel->setProperty(_item, "size", QVariant::fromValue(size));
         _worldModel->setProperty(_item, "inertia", QVariant::fromValue(inertia));
+	
+	RigidBodyMenuHandler* menuHandler = new RigidBodyMenuHandler(_item, _worldModel, NULL);
+	menuHandler->setupDialog();
+	menuHandler->deleteLater();
+	
         _worldModel->endMacro();
 
         showMessage(MessageFrame::Information,
@@ -476,6 +560,12 @@ bool PolygonCreator::sceneEvent(QEvent* event)
                 static_cast<QKeyEvent*>(event)->key() == Qt::Key_Return) {
         fixCenterOfMass();
         fixInertia();
+    
+    
+    RigidBodyMenuHandler* menuHandler = new RigidBodyMenuHandler(_item, _worldModel, NULL);
+    menuHandler->setupDialog();
+    menuHandler->deleteLater();
+    
         _worldModel->endMacro();
 
         showMessage(MessageFrame::Information,

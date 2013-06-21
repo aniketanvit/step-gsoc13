@@ -183,63 +183,6 @@ protected:
     double _mass;
 };
 
-/** \ingroup errors
- *  \brief Errors object for ChargedParticle
- */
-#if 0
-class ChargedParticleErrors: public ParticleErrors
-{
-    STEPCORE_OBJECT(ChargedParticleErrors)
-
-public:
-    /** Constructs ChargedParticleErrors */
-    ChargedParticleErrors(Item* owner = 0)
-        : ParticleErrors(owner), _chargeVariance(0) {}
-
-    /** Get owner as ChargedParticle */
-    ChargedParticle* chargedParticle() const;
-
-    /** Get charge variance */
-    double chargeVariance() const { return _chargeVariance; }
-    /** Set charge variance */
-    void   setChargeVariance(double chargeVariance) {
-        _chargeVariance = chargeVariance; }
-
-protected:
-    double _chargeVariance;
-    friend class ChargedParticle;
-};
-
-
-/** \ingroup bodies
- *  \brief ChargedParticle with mass and charge
- */
-class ChargedParticle: public Particle
-{
-    STEPCORE_OBJECT(ChargedParticle)
-
-public:
-    /** Constructs a charged particle */
-    explicit ChargedParticle(Vector2d position = Vector2d::Zero(),
-            Vector2d velocity = Vector2d::Zero(), double mass = 1, double charge = 0)
-                : Particle(position, velocity, mass), _charge(charge) {}
-
-    /** Charge of the particle */
-    double charge() const { return _charge; }
-    /** Charge of the particle */
-    void setCharge(double charge) { _charge = charge; }
-
-    /** Get (and possibly create) ChargedParticleErrors object */
-    ChargedParticleErrors* chargedParticleErrors() {
-        return static_cast<ChargedParticleErrors*>(objectErrors()); }
-
-protected:
-    ObjectErrors* createObjectErrors() { return new ChargedParticleErrors(this); }
-
-    double _charge;
-};
-#endif
-
 } // namespace StepCore
 #endif
 

@@ -16,6 +16,8 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+#include "object.h"
+#include "world.h"
 #include "rigidbody.h"
 #include "types.h"
 #include <cstring>
@@ -48,7 +50,10 @@ STEPCORE_META_OBJECT(RigidBody, QT_TRANSLATE_NOOP("ObjectClass", "RigidBody"), Q
         STEPCORE_PROPERTY_RWF(double, angularMomentum, QT_TRANSLATE_NOOP("PropertyName", "angularMomentum"), STEPCORE_FROM_UTF8(QT_TRANSLATE_NOOP("Units", "kg m² rad/s")), QT_TR_NOOP("angular momentum"),
                         StepCore::MetaProperty::DYNAMIC, angularMomentum, setAngularMomentum)
         STEPCORE_PROPERTY_RWF(double, kineticEnergy, QT_TRANSLATE_NOOP("PropertyName", "kineticEnergy"), QT_TRANSLATE_NOOP("Units", "J"), QT_TR_NOOP("kinetic energy"),
-                        StepCore::MetaProperty::DYNAMIC, kineticEnergy, setKineticEnergy))
+                        StepCore::MetaProperty::DYNAMIC, kineticEnergy, setKineticEnergy)
+	STEPCORE_PROPERTY_RW(double, massDensity, QT_TRANSLATE_NOOP("PropertyName", "massDensity"),
+								    STEPCORE_FROM_UTF8(QT_TRANSLATE_NOOP("Units", "kg/m²")), QT_TR_NOOP("Mass Density of the Rigid Body"),
+			     massDensity, setMassDensity))
 
 STEPCORE_META_OBJECT(RigidBodyErrors, QT_TRANSLATE_NOOP("ObjectClass", "RigidBodyErrors"), QT_TR_NOOP("Errors class for RigidBody"), 0, STEPCORE_SUPER_CLASS(ObjectErrors),
         STEPCORE_PROPERTY_RW_D(StepCore::Vector2d, positionVariance, QT_TRANSLATE_NOOP("PropertyName", "positionVariance"), QT_TRANSLATE_NOOP("Units", "m"),
@@ -71,8 +76,8 @@ STEPCORE_META_OBJECT(RigidBodyErrors, QT_TRANSLATE_NOOP("ObjectClass", "RigidBod
 
         STEPCORE_PROPERTY_RW(double, massVariance, QT_TRANSLATE_NOOP("PropertyName", "massVariance"), QT_TRANSLATE_NOOP("Units", "kg"),
                     QT_TR_NOOP("mass variance"), massVariance, setMassVariance )
-	//STEPCORE_PROPERTY_RW(double, chargeVariance, QT_TRANSLATE_NOOP("PropertyName", "chargeVariance"), QT_TRANSLATE_NOOP("Units", "C"),
-	//	    QT_TR_NOOP("charge variance"), chargeVariance, setChargeVariance )
+	//STEPCORE_PROPERTY_RWF(double, chargeVariance, QT_TRANSLATE_NOOP("PropertyName", "chargeVariance"), QT_TRANSLATE_NOOP("Units", "C"),
+	//	    QT_TR_NOOP("charge variance"), StepCore::MetaProperty::DYNAMIC, chargeVariance, setChargeVariance )
 	STEPCORE_PROPERTY_RW(double, inertiaVariance, QT_TRANSLATE_NOOP("PropertyName", "inertiaVariance"), STEPCORE_FROM_UTF8(QT_TRANSLATE_NOOP("Units", "kg m²")),
                     QT_TR_NOOP("inertia variance"), inertiaVariance, setInertiaVariance )
         STEPCORE_PROPERTY_RWF(StepCore::Vector2d, momentumVariance, QT_TRANSLATE_NOOP("PropertyName", "momentumVariance"), QT_TRANSLATE_NOOP("Units", "kg m/s"),
@@ -84,7 +89,9 @@ STEPCORE_META_OBJECT(RigidBodyErrors, QT_TRANSLATE_NOOP("ObjectClass", "RigidBod
                     QT_TR_NOOP("kinetic energy variance"), StepCore::MetaProperty::DYNAMIC, kineticEnergyVariance, setKineticEnergyVariance))
 
 STEPCORE_META_OBJECT(Disk, QT_TRANSLATE_NOOP("ObjectClass", "Disk"), QT_TR_NOOP("Rigid disk"), 0, STEPCORE_SUPER_CLASS(RigidBody),
-        STEPCORE_PROPERTY_RW(double, radius, QT_TRANSLATE_NOOP("PropertyName", "radius"), QT_TRANSLATE_NOOP("Units", "m"), QT_TR_NOOP("Radius of the disk"), radius, setRadius))
+        STEPCORE_PROPERTY_RW(double, radius, QT_TRANSLATE_NOOP("PropertyName", "radius"), QT_TRANSLATE_NOOP("Units", "m"), QT_TR_NOOP("Radius of the disk"), radius, setRadius)
+	//STEPCORE_PROPERTY_R_D(double, charge, QT_TRANSLATE_NOOP("PropertyName", "charge"), QT_TRANSLATE_NOOP("Units", "C"), QT_TR_NOOP("Charge on the disk"), charge 
+	)
 
 STEPCORE_META_OBJECT(BasePolygon, QT_TRANSLATE_NOOP("ObjectClass", "BasePolygon"), QT_TR_NOOP("Base polygon body"), 0, STEPCORE_SUPER_CLASS(RigidBody),)
 
@@ -174,9 +181,9 @@ void RigidBodyErrors::setKineticEnergyVariance(double kineticEnergyVariance)
 }
 
 RigidBody::RigidBody(Vector2d position, double angle,
-        Vector2d velocity, double angularVelocity, double mass, double inertia, double charge)
+        Vector2d velocity, double angularVelocity, double mass, double inertia)
     : _position(position), _angle(angle), _velocity(velocity), _angularVelocity(angularVelocity),
-      _force(Vector2d::Zero()), _torque(0), _mass(mass), _inertia(inertia), _charge(charge)
+      _force(Vector2d::Zero()), _torque(0), _mass(mass), _inertia(inertia)
 {
 }
 
