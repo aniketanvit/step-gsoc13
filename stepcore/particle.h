@@ -113,6 +113,7 @@ public:
     explicit Particle(Vector2d position = Vector2d::Zero(),
             Vector2d velocity = Vector2d::Zero(), double mass = 1);
 
+    Vector2d force() { return _force; }
     /** Get position of the particle */
     const Vector2d& position() const { return _position; }
     /** Set position of the particle */
@@ -171,6 +172,7 @@ protected:
     Vector2d _velocity;
     Vector2d _force;
     double _mass;
+    
 };
 
 /** \ingroup errors

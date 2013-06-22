@@ -39,6 +39,7 @@ class Body;
 /** \ingroup contacts
  *  \brief Description of contact between two bodies
  */
+	    
 struct Contact {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -65,16 +66,25 @@ struct Contact {
     int      state;         /**< Contact state (maximum of pointsState if pointsCount > 0) */
     double   distance;      /**< Distance between bodies */
     Vector2d normal;        /**< Contact normal (pointing from body0 to body1) */
+    Vector2d tangent;         /**< perpendicular to the contact normal      */
     Vector2d normalDerivative; /**< Time derivative of contact normal (only if state == Contacted) */
     int      pointsCount;   /**< Count of contact points (either one or two) */
     int      pointsState[2];/**< Contact point states */
     Vector2d points[2];     /**< Contact point coordinated */
     double   vrel[2];       /**< Relative velocities at contact points */
 
+    // section for friction and restitution
+    double _frictionCoefficient;
+    double _restitutionCoefficient;
+    int slipping;                          // 1 means body1 slipping along +x on body0
+    Vector2d pointOfBody0;
+    Vector2d pointOfBody1;
     // Cached values from previous run
     // TODO: move it to GJK-specific derived struct
     int _w1[2];
 };
+
+typedef std::vector<Contact, Eigen::aligned_allocator<Contact> > ContactValueList;
 
 /** \ingroup contacts
  *  \brief Collision solver interface
@@ -131,15 +141,14 @@ public:
     enum {
         InternalError = Solver::CollisionError
     };
-
+    ContactValueList _contacts;
+    
 protected:
+  
     double _toleranceAbs;
     //double _toleranceRel;
     double _localError;
 };
-
-typedef std::vector<Contact, Eigen::aligned_allocator<Contact> >
-            ContactValueList;
 
 /** \ingroup contacts
  *  \brief Discrete collision solver using Gilbert-Johnson-Keerthi distance algorithm
@@ -203,7 +212,7 @@ protected:
     void checkCache(BodyList& bodies);
 
 protected:
-    ContactValueList _contacts;
+    
     bool             _contactsIsValid;
 };
 

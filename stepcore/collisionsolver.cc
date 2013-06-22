@@ -205,6 +205,7 @@ int GJKCollisionSolver::checkPolygonPolygon(Contact* contact)
         */
         contact->distance = 0;
         contact->normal.setZero();
+	contact->tangent.setZero();
         contact->pointsCount = 0;
         return contact->state = Contact::Intersected;
     }
@@ -488,6 +489,7 @@ int GJKCollisionSolver::checkPolygonDisk(Contact* contact)
         }*/
         contact->distance = 0;
         contact->normal.setZero();
+	contact->tangent.setZero();
         contact->pointsCount = 0;
         return contact->state = Contact::Intersected;
     }
@@ -683,6 +685,7 @@ int GJKCollisionSolver::checkPolygonParticle(Contact* contact)
         */
         contact->distance = 0;
         contact->normal.setZero();
+	contact->tangent.setZero();
         contact->pointsCount = 0;
         return contact->state = Contact::Intersected;
     }
@@ -704,6 +707,7 @@ int GJKCollisionSolver::checkPolygonParticle(Contact* contact)
     double vnorm = v.norm();
     contact->distance = vnorm;
     contact->normal = v/vnorm;
+    contact->tangent = Vector2d(-contact->normal[1], contact->normal[0]);
 
     contact->_w1[0] = wi[0];
 
@@ -738,6 +742,8 @@ int GJKCollisionSolver::checkDiskDisk(Contact* contact)
     double rd = disk1->radius() + disk0->radius();
     double rn = r.norm();
     contact->normal = r/rn;
+     contact->tangent(-contact->normal[1], contact->normal[0]);
+    
     contact->distance = rn - rd;
 
     if(contact->distance > _toleranceAbs) {
@@ -750,7 +756,19 @@ int GJKCollisionSolver::checkDiskDisk(Contact* contact)
 
     contact->pointsCount = 1;
     contact->points[0] = disk0->position() + contact->normal * disk0->radius();
-
+    
+     contact->pointOfBody0 = disk0->position() + contact->normal*disk0->radius();
+     contact->pointOfBody1 = disk1->position() + contact->normal*disk1->radius();
+    
+    Vector2d vPointOfDisk0 = disk0->velocityWorld(contact->pointOfBody0);
+    Vector2d vPointOfDisk1 = disk1->velocityWorld(contact->pointOfBody1);
+    Vector2d pointsVrel(vPointOfDisk0[0]-vPointOfDisk0[1], vPointOfDisk0[1]-vPointOfDisk1[1]);
+    
+    double velocityAlongTangent = contact->tangent.dot(pointsVrel);
+    if(velocityAlongTangent == 0) contact->slipping = 0;     // the points in contact have no tendency of slipping
+    else if(velocityAlongTangent < 0) contact->slipping = 1; // forward slipping of disk1 on disk2
+    else if(velocityAlongTangent > 0) contact->slipping = -1;  // backward slipping
+    
     Vector2d v = disk1->velocity() - disk0->velocity();
     contact->vrel[0] = contact->normal.dot(v);
     contact->normalDerivative = v / rn - (r.dot(v)/rn/rn/rn) * r;
@@ -775,6 +793,7 @@ int GJKCollisionSolver::checkDiskParticle(Contact* contact)
     double rd = disk0->radius();
     double rn = r.norm();
     contact->normal = r/rn;
+    contact->tangent = Vector2d(-contact->normal[1], contact->normal[0]);
     contact->distance = rn - rd;
 
     if(contact->distance > _toleranceAbs) {
@@ -919,6 +938,26 @@ void GJKCollisionSolver::getContactsInfo(ConstraintsInfo& info, bool collisions)
                         info.jacobianDerivative.coeffRef(i, contact.body1->variablesOffset() + RigidBody::AngleOffset) = -rd;
                 }
                 info.forceMin[i] = 0;
+		/*
+		 * apply friction force on the bodies in contact here..
+		 * first find if there is any slipping between the points in contact
+		 * if there is then calculate the normal force between them
+		 * then apply  "\mu" times the normal force on bodies.
+		 *//*
+		double mu;
+		// find if there is slipping between the bodies in contact
+		
+		if(contact.slipping !=0){
+		  
+		  RigidBody* firstBody = static_cast<RigidBody*>(contact.body0);
+		  firstBody->applyForce(Vector2d(2,2), contact.points[p]);
+		  RigidBody* secondBody = static_cast<RigidBody*>(contact.body1);
+		  secondBody->applyForce(Vector2d(-2,-2), contact.points[p]);
+		  if(contact->slipping == 1) {
+		    // find whether to apply static friction or dynamic friction
+		    firstBody->force().dot()
+		  }
+		}*/
             }
             
         } else if(collisions && contact.state == Contact::Colliding) {
@@ -949,15 +988,15 @@ void GJKCollisionSolver::getContactsInfo(ConstraintsInfo& info, bool collisions)
 		 * elastic-collision will be assumed i.e the user hasn't set any coefficients for that 
 		 * pair of bodies
 		 */
-		double b;/*
+		double b,f;/*
 		QPair<Body*, Body*> pair1 = qMakePair(contact.body0, contact.body1);
 		if(FrictionForce::_frictionHash.contains(pair1)) {
 		  QPair<double, double> pair2 = FrictionForce::_frictionHash.value(pair1);
 		 b = pair2.second;
 		}
 		else {*/
-		  b = 1;// }
-		
+		  b = 0.7;// }
+		  
                 info.jacobianDerivative.coeffRef(i, contact.body0->variablesOffset() +
                                         RigidBody::PositionOffset) = ( -(1+b)*contact.normal[0]);
                 info.jacobianDerivative.coeffRef(i, contact.body0->variablesOffset() +

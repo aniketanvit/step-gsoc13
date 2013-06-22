@@ -27,6 +27,7 @@ public:
 namespace Ui {
  class WidgetCreateFrictionForce;
 }
+/*
 class FrictionForceGraphicsItem : public WorldGraphicsItem
 {
 public:
@@ -45,7 +46,7 @@ protected:
     
   }
 };
-
+*/
 class FrictionForceKDialog;
 
 class FrictionForceMenuHandler : public ItemMenuHandler

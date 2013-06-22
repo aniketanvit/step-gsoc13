@@ -97,6 +97,10 @@ WorldFactory::WorldFactory()
     #define __REGISTER_EXT_E(Class, GraphicsCreator, GraphicsItem, ItemMenuHandler) \
         __REGISTER_EXT(Class, GraphicsCreator, GraphicsItem, ItemMenuHandler); \
         registerMetaObject(StepCore::Class##Errors::staticMetaObject())
+        
+            #define __REGISTER_EXT_F(class, GraphicsCreator, ItemMenuHandler) \
+            __REGISTER_EXT(class, GraphicsCreator, NULL, ItemMenuHandler) 
+            
 
     #define __ADD_TO_PALETTE(Class) \
         _paletteMetaObjects.push_back(QString(StepCore::Class::staticMetaObject()->className()))
@@ -118,7 +122,7 @@ WorldFactory::WorldFactory()
     __REGISTER_EXT_E(Particle, ItemCreator, ParticleGraphicsItem, ItemMenuHandler);
     __REGISTER_EXT_E(ChargedParticle, ItemCreator, ParticleGraphicsItem, ItemMenuHandler);
 
-    __REGISTER_EXT(FrictionForce, FrictionForceCreator, FrictionForceGraphicsItem, FrictionForceMenuHandler);
+   // __REGISTER_EXT(FrictionForce, FrictionForceCreator,WorldGraphicsItem, FrictionForceMenuHandler);
     __REGISTER_EXT(Disk, DiskCreator, DiskGraphicsItem, ItemMenuHandler);
     __REGISTER_EXT(Box, BoxCreator, BoxGraphicsItem, ItemMenuHandler);
     __REGISTER_EXT(Polygon, PolygonCreator, PolygonGraphicsItem, ItemMenuHandler);
@@ -185,7 +189,7 @@ WorldFactory::WorldFactory()
     __ADD_TO_PALETTE(Polygon);
     __ADD_SEPARATOR;
 
-    __ADD_TO_PALETTE(FrictionForce);
+    //__ADD_TO_PALETTE(FrictionForce);
     __ADD_TO_PALETTE(Spring);
     __ADD_TO_PALETTE(LinearMotor);
     __ADD_TO_PALETTE(CircularMotor);

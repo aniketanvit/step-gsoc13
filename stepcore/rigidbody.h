@@ -198,6 +198,7 @@ public:
 
     //void applyForceLocal(const Vector2d& localPosition = Vector2d(0,0));
 
+    Vector2d force() { return _force; }
     /** Apply force (and torque) to the body at given position (in World coordinates) */
     void applyForce(const Vector2d& force, const Vector2d& position);
 

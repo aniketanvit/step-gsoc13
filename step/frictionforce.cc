@@ -134,11 +134,11 @@ else
  
  
  bool FrictionForceMenuHandler::createFrictionApply()
- {
+ {/*
    _worldModel->world()->_frCoeff = _createFrictionForceUi->_frictionLineEdit->text().toDouble();
    _worldModel->world()->_rrCoeff = _createFrictionForceUi->_restitutionLineEdit->text().toDouble();
    
-   _worldModel->world()->fillFrictionHash();
+   _worldModel->world()->fillFrictionHash();*/
    return true;
    
    

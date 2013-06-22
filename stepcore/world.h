@@ -147,6 +147,7 @@ public:
 
     /** Get count of dynamic variables (not including velocities) */
     virtual int  variablesCount() = 0;
+    virtual Vector2d force() = 0;
 
     /** Set positions, velocities and (possibly) its variances using values in arrays and
      *  also reset accelerations and its variances. Variances should only be copied
