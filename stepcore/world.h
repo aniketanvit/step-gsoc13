@@ -144,7 +144,7 @@ class Body
 public:
     Body(): _variablesOffset(0) {}
     virtual ~Body() {}
-
+    
     /** Get count of dynamic variables (not including velocities) */
     virtual int  variablesCount() = 0;
     virtual Vector2d force() = 0;
@@ -482,7 +482,7 @@ public:
      *  current (or any subsequent) doEvolve operation will be aborted as soon as possible. */
     void setEvolveAbort(bool evolveAbort = true) { _evolveAbort = evolveAbort; }
     
-        QHash< QPair<Body*, Body*>, QPair<double, double> > _frictionHash;
+  QHash< QPair<Body*, Body*>, QPair<double, double> > _frictionHash;
 	
     Body* _body1;
     Body* _body2;
