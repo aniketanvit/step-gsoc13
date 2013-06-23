@@ -36,6 +36,7 @@
 #include <stepcore/joint.h>
 #include <stepcore/tool.h>
 #include <stepcore/types.h>
+#include <stepcore/forcefield.h>
 
 #include "particlegraphics.h"
 #include "polygongraphics.h"
@@ -137,6 +138,7 @@ WorldFactory::WorldFactory()
     __REGISTER_E(WeightForce);
     __REGISTER_E(GravitationForce);
     __REGISTER_E(CoulombForce);
+    __REGISTER_E(ForceField);
 
     __REGISTER_EXT(Anchor, AnchorCreator, AnchorGraphicsItem, ItemMenuHandler);
     __REGISTER_EXT(Pin, PinCreator, PinGraphicsItem, ItemMenuHandler);
@@ -195,6 +197,7 @@ WorldFactory::WorldFactory()
     __ADD_TO_PALETTE(WeightForce);
     __ADD_TO_PALETTE(GravitationForce);
     __ADD_TO_PALETTE(CoulombForce);
+    __ADD_TO_PALETTE(ForceField);
     __ADD_SEPARATOR;
 
     __ADD_TO_PALETTE(Anchor);

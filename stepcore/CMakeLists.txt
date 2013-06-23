@@ -14,6 +14,7 @@ set(stepcore_SRCS
     softbody.cc
     gravitation.cc
     coulombforce.cc
+    forcefield.cc
     spring.cc
     motor.cc
     joint.cc
