@@ -243,7 +243,7 @@ protected:
     /** Set to true if the item should be moved alone (without other selected items) */
     void setExclusiveMoving(bool value) { _exclusiveMoving = value; }
 
-    /** Set custum test for undo command for moving item. Works only if exclusiveMoving is true */
+    /** Set custum text for undo command for moving item. Works only if exclusiveMoving is true */
     void setExclusiveMovingMessage(const QString& message) { _exclusiveMovingMessage = message; }
 
     /** Called when graphicsitem is changed */

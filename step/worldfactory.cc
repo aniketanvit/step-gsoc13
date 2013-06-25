@@ -36,7 +36,9 @@
 #include <stepcore/joint.h>
 #include <stepcore/tool.h>
 #include <stepcore/types.h>
+#include <stepcore/pulleycord.h>
 
+#include "pulleycordgraphics.h"
 #include "particlegraphics.h"
 #include "polygongraphics.h"
 #include "gasgraphics.h"
@@ -129,6 +131,7 @@ WorldFactory::WorldFactory()
     __REGISTER_EXT(SoftBodyParticle, ItemCreator, SoftBodyParticleGraphicsItem, ItemMenuHandler);
     __REGISTER_EXT(SoftBody, SoftBodyCreator, SoftBodyGraphicsItem, SoftBodyMenuHandler);
 
+    __REGISTER_EXT_E(PulleyCord, PulleyCordCreator, PulleyCordGraphicsItem, ItemMenuHandler);
     __REGISTER_EXT_E(Spring, SpringCreator, SpringGraphicsItem, ItemMenuHandler);
     __REGISTER_EXT(LinearMotor, LinearMotorCreator, LinearMotorGraphicsItem, ItemMenuHandler);
     __REGISTER_EXT(CircularMotor, CircularMotorCreator, CircularMotorGraphicsItem, ItemMenuHandler);
@@ -183,6 +186,7 @@ WorldFactory::WorldFactory()
     __ADD_TO_PALETTE(Polygon);
     __ADD_SEPARATOR;
 
+    __ADD_TO_PALETTE(PulleyCord);
     __ADD_TO_PALETTE(Spring);
     __ADD_TO_PALETTE(LinearMotor);
     __ADD_TO_PALETTE(CircularMotor);

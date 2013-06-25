@@ -30,7 +30,6 @@
 #include "vector.h"
 
 #include <QString>
-#include <cmath>
 
 namespace StepCore
 {
@@ -50,7 +49,7 @@ public:
         : ObjectErrors(owner), _restLengthVariance(0), _stiffnessVariance(0),
           _dampingVariance(0), _localPosition1Variance(0,0), _localPosition2Variance(0,0) {}
 
-    /** Get owner as String */
+    /** Get owner as Spring */
     Spring* spring() const;
 
     /** Get restLength variance */

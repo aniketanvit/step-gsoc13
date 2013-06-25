@@ -15,6 +15,7 @@ set(step_SRCS
     polygongraphics.cc
     gasgraphics.cc
     softbodygraphics.cc
+    pulleycordgraphics.cc
     springgraphics.cc
     motorgraphics.cc
     jointgraphics.cc
