@@ -227,6 +227,7 @@ int GJKCollisionSolver::checkPolygonPolygon(Contact* contact)
     double vnorm = v.norm();
     contact->distance = vnorm;
     contact->normal = v/vnorm;
+    contact->tangent = Vector2d(-contact->normal[1], contact->normal[0]);
     contact->pointsCount = 0;
     contact->state = Contact::Separated;
 
@@ -330,7 +331,15 @@ int GJKCollisionSolver::checkPolygonPolygon(Contact* contact)
         contact->vrel[i] = contact->normal.dot(
                         polygon1->velocityWorld(contact->points[i]) -
                         polygon0->velocityWorld(contact->points[i]));
-
+	
+	double slip = contact->tangent.dot(polygon1->velocityWorld(contact->points[i]) - polygon0->velocityWorld(contact->points[i]));
+	if(slip < 0)
+	  contact->slipState[i] = Contact::ForwardSlipping;
+	else if(slip > 0)
+	  contact->slipState[i] = Contact::BackwardSlipping;
+	else
+	  contact->slipState[i] = Contact::NoSlipping;
+	
         if(contact->vrel[i] < 0)
             contact->pointsState[i] = Contact::Colliding;
         else if(contact->vrel[i] < _toleranceAbs) // XXX: tolerance
@@ -511,6 +520,7 @@ int GJKCollisionSolver::checkPolygonDisk(Contact* contact)
     double vnorm = v.norm();
     contact->distance = vnorm - disk1->radius();
     contact->normal = v/vnorm;
+    contact->tangent = Vector2d(-contact->normal[1], contact->normal[0]);
 
     contact->_w1[0] = wi[0];
 
@@ -528,7 +538,15 @@ int GJKCollisionSolver::checkPolygonDisk(Contact* contact)
     contact->vrel[0] = contact->normal.dot(
                         disk1->velocity() - 
                         polygon0->velocityWorld(contact->points[0]));
-
+    
+    double slip = contact->tangent.dot(disk1->velocityWorld(contact->points[0]) - polygon0->velocityWorld(contact->points[0]));
+    if(slip < 0)
+      contact->slipState[0] = Contact::ForwardSlipping;       // body1 slipping ahead on body0;
+    else if(slip > 0)
+      contact->slipState[0] = Contact::BackwardSlipping;
+    else
+      contact->slipState[0] = Contact::NoSlipping;
+    
     if(contact->vrel[0] < 0)
         contact->pointsState[0] = Contact::Colliding;
     else if(contact->vrel[0] < _toleranceAbs) // XXX: tolerance
@@ -757,22 +775,18 @@ int GJKCollisionSolver::checkDiskDisk(Contact* contact)
     contact->pointsCount = 1;
     contact->points[0] = disk0->position() + contact->normal * disk0->radius();
     
-     contact->pointOfBody0 = disk0->position() + contact->normal*disk0->radius();
-     contact->pointOfBody1 = disk1->position() + contact->normal*disk1->radius();
-    
-    Vector2d vPointOfDisk0 = disk0->velocityWorld(contact->pointOfBody0);
-    Vector2d vPointOfDisk1 = disk1->velocityWorld(contact->pointOfBody1);
-    Vector2d pointsVrel(vPointOfDisk0[0]-vPointOfDisk0[1], vPointOfDisk0[1]-vPointOfDisk1[1]);
-    
-    double velocityAlongTangent = contact->tangent.dot(pointsVrel);
-    if(velocityAlongTangent == 0) contact->slipping = 0;     // the points in contact have no tendency of slipping
-    else if(velocityAlongTangent < 0) contact->slipping = 1; // forward slipping of disk1 on disk2
-    else if(velocityAlongTangent > 0) contact->slipping = -1;  // backward slipping
-    
     Vector2d v = disk1->velocity() - disk0->velocity();
     contact->vrel[0] = contact->normal.dot(v);
     contact->normalDerivative = v / rn - (r.dot(v)/rn/rn/rn) * r;
-
+    
+    double slip = contact->tangent.dot(disk1->velocityWorld(contact->points[0]) - disk0->velocityWorld(contact->points[0]));
+    if(slip < 0)
+      contact->slipState[0] = Contact::ForwardSlipping;
+    else if(slip >0)
+      contact->slipState[0] = Contact::BackwardSlipping;
+    else 
+      contact->slipState[0] = Contact::NoSlipping;
+    
     if(contact->vrel[0] < 0)
         contact->pointsState[0] = Contact::Colliding;
     else if(contact->vrel[0] < _toleranceAbs) // XXX: tolerance
@@ -809,6 +823,15 @@ int GJKCollisionSolver::checkDiskParticle(Contact* contact)
 
     Vector2d v = particle1->velocity() - disk0->velocity();
     contact->vrel[0] = contact->normal.dot(v);
+    
+    double slip = contact->tangent.dot(particle1->velocity() - disk0->velocityWorld(contact->points[0]));
+    if(slip < 0)
+      contact->slipState[0] = Contact::ForwardSlipping;
+    else if(slip >0)
+      contact->slipState[0] = Contact::BackwardSlipping;
+    else
+      contact->slipState[0] = Contact::NoSlipping;
+    
     contact->normalDerivative = v / rn - (r.dot(v)/rn/rn/rn) * r;
 
     if(contact->vrel[0] < 0)

@@ -42,7 +42,10 @@ class Body;
 	    
 struct Contact {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
+   // provide a constructor to initialise the values of the coefficients to zero
+      Contact(): _restitutionCoefficient(0.6),  _frictionCoefficient(0.9){}
+      ~Contact(){}
+    
     enum {
         Unknown = 0,    /**< Contact state was not (can not) be determined
                              (if state == Unknown all other fields are not used) */
@@ -60,6 +63,12 @@ struct Contact {
         DiskDiskType,
         DiskParticleType
     };
+    enum {
+      ForwardSlipping, 
+      BackwardSlipping,
+      NoSlipping
+    };
+    
     int      type;          /**< Contact type (used internally) */
     Body*    body0;         /**< Body0 */
     Body*    body1;         /**< Body1 */
@@ -74,11 +83,10 @@ struct Contact {
     double   vrel[2];       /**< Relative velocities at contact points */
 
     // section for friction and restitution
-    double _frictionCoefficient;
-    double _restitutionCoefficient;
-    int slipping;                          // 1 means body1 slipping along +x on body0
-    Vector2d pointOfBody0;
-    Vector2d pointOfBody1;
+    double    _restitutionCoefficient;
+    double    _frictionCoefficient;
+    int       slipState[2];                          // 1 means body1 slipping along +x on body0
+    double normalForce;                                // magnitude of the normal force between the contacted bodies
     // Cached values from previous run
     // TODO: move it to GJK-specific derived struct
     int _w1[2];

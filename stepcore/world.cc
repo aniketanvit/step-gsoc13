@@ -21,6 +21,7 @@
 #include "collisionsolver.h"
 #include "constraintsolver.h"
 #include "rigidbody.h"
+#include "particle.h"
 #include <algorithm>
 #include <cmath>
 #include <QtGlobal>
@@ -904,7 +905,7 @@ inline int World::solverFunction(double t, const double* y,
           if(state != Solver::OK) return state;
 	  
 	  /*
-	   * apply friction force due to for Contacted bodies here 
+	   * apply friction force on the Contacted bodies here 
 	   * i.e. after the _constraintSolver->solve()  has been called and the 
 	   * forces due to joints are known
 	   *
@@ -915,6 +916,24 @@ inline int World::solverFunction(double t, const double* y,
           const BodyList::const_iterator b_end = _bodies.end();
 	  const ContactValueList::const_iterator c_end = _collisionSolver->_contacts.end();
 	  ContactValueList::iterator it;
+	  // make the same iterations here to first fill the normalforce of each contact.
+	  for(BodyList::iterator body = _bodies.begin(); body != b_end; ++body) {
+	    
+	    for(it = _collisionSolver->_contacts.begin(); it != c_end; it++) {
+	      //take the value of force acting on the body before applying constraints.
+	      if((*(*body)).variablesOffset() == (*(*it).body0).variablesOffset() || 
+		(*(*body)).variablesOffset() == (*(*it).body1).variablesOffset()) 
+	      {
+		Vector2d currentForce = (*body)->force();
+	        Vector2d constraintForce(_constraintsInfo.force[offset], _constraintsInfo.force[offset+1]);
+		if(constraintForce.dot((*it).normal) > (*it).normalForce)
+		  (*it).normalForce = constraintForce.dot((*it).normal);
+	         
+	      }
+	      offset += (*body)->variablesCount();
+	    }
+	  }
+	  offset = 0;
           for(BodyList::iterator body = _bodies.begin(); body != b_end; ++body) {
 	    
 	    for(it = _collisionSolver->_contacts.begin(); it != c_end; it++) {
@@ -924,67 +943,74 @@ inline int World::solverFunction(double t, const double* y,
 		 * find \mu and then 
 		 */
 		if((*it).state == Contact::Contacted)
-		{
-		  if((*(*body)).variablesOffset() == (*(*it).body0).variablesOffset()) {/*
-		  Vector2d  contactNormal(_constraintsInfo.force[offset], _constraintsInfo.force[offset+1]);
-		  double frictionLimit =  0.8*contactNormal.dot((*it).normal);
-		 // (*body)->addForce(&_constraintsInfo.force[offset], NULL);
-		  Vector2d resultingForce = (*body)->force() + Vector2d(_constraintsInfo.force[offset], _constraintsInfo.force[offset+1]);
-		  if(frictionLimit > (*it).tangent.dot(resultingForce)) {
-		    Vector2d frictionForce = ((*it).tangent.dot(resultingForce))*((*it).tangent);
-		    RigidBody* firstBody = static_cast<RigidBody*>((*it).body0);
-		    firstBody->applyForce(frictionForce, (*it).pointOfBody0);
-		    //RigidBody* secondBody = static_cast<RigidBody*>((*it).body1);
-		    //secondBody->applyForce(-frictionForce, (*it).pointOfBody1);
-		  }
-		  else {
-		    RigidBody* firstBody = static_cast<RigidBody*>((*it).body0);
-		    firstBody->applyForce(frictionLimit*((*it).tangent), (*it).pointOfBody0);
-		    //RigidBody* secondBody = static_cast<RigidBody*>((*it).body1);
-		    //secondBody->applyForce(frictionLimit*((*it).tangent), (*it).pointOfBody1);
-		    
-		  } */
-		  qDebug() <<"found !! it is first body"<<endl;
-		  }
-		 else if((*(*body)).variablesOffset() == (*(*it).body1).variablesOffset()) {/*
-		   Vector2d  contactNormal(_constraintsInfo.force[offset], _constraintsInfo.force[offset+1]);
-		   double frictionLimit =  0.8*contactNormal.dot((*it).normal);
-		   //(*body)->addForce(&_constraintsInfo.force[offset], NULL);
-		   Vector2d resultingForce = (*body)->force() + Vector2d(_constraintsInfo.force[offset], _constraintsInfo.force[offset+1]);
-		   if(frictionLimit > (*it).tangent.dot(resultingForce)) {
-		     Vector2d frictionForce = (*it).tangent.dot(resultingForce)*((*it).tangent);
-		     RigidBody* firstBody = static_cast<RigidBody*>((*it).body0);
-		     firstBody->applyForce(frictionForce, (*it).pointOfBody0);
-		     //RigidBody* secondBody = static_cast<RigidBody*>((*it).body1);
-		     //secondBody->applyForce(-frictionForce, (*it).pointOfBody1);
-		   }
-		   else {
-		    RigidBody* firstBody = static_cast<RigidBody*>((*it).body0);
-		   firstBody->applyForce(frictionLimit*((*it).tangent), (*it).pointOfBody0);
-		   //RigidBody* secondBody = static_cast<RigidBody*>((*it).body1);
-		   //secondBody->applyForce(-frictionLimit*((*it).tangent), (*it).pointOfBody1);
+		{ 
+		  Body* fBody = 0;
+		  Vector2d applicableForce(0,0);
+		  if((*(*body)).variablesOffset() == (*(*it).body0).variablesOffset())
+		  { fBody = (*it).body0;	 qDebug()<<"firstBody"<<endl; qDebug()<<(*it).tangent[0]<<"  "<<(*it).tangent[1]<<endl; }
+		  else if((*(*body)).variablesOffset() == (*(*it).body1).variablesOffset())
+		  { fBody = (*it).body0;       qDebug()<<"secondbody"<<endl; qDebug()<<(*it).tangent[0]<<"  "<<(*it).tangent[1]<<endl; }
+		  else continue;
 		  
-		  }  */
-		qDebug() <<"found! it is second body"<<endl;
-	      }
-	      //else {
-		//(*body)->addForce(&_constraintsInfo.force[offset], NULL);
-	        //} 
-              }  // close if((*it).state == Contact::Contacted)
-		//else { (*body)->addForce(&_constraintsInfo.force[offset], NULL);
-		//} */
-	    }
-	   // qDebug () << "variables offset body"<<offset<<" =" <<(*body)->variablesOffset()<<endl;
-	   // qDebug () <<"variables offset body0 of contact"<<offset<<"="<<(*it).body0->variablesOffset()<<endl;
-	    //qDebug () <<"variables offset body1 of contact"<<offset<<"="<<(*it).body1->variablesOffset()<<endl;
-              
-	            (*body)->addForce(&_constraintsInfo.force[offset], NULL);
-	    	    (*body)->getAccelerations(f+_variablesCount+offset, NULL);
-		    offset += (*body)->variablesCount();
+		  Vector2d  contactForce(_constraintsInfo.force[offset], _constraintsInfo.force[offset+1]);
+		  double frictionLimit =  2*(*it).normalForce; qDebug()<<"FrictionLimit="<<frictionLimit<<endl;
+		  // slipping part here...
+		  
+		  if((*it).slipState[0] == Contact::ForwardSlipping) {
+		    // check with the direction of the tangent
+		    // and apply friction in the right direction . Consider particles as well 
+		    
+		    RigidBody* firstBody = static_cast<RigidBody*>(fBody);
+		    firstBody->applyForce(frictionLimit*(*it).tangent, (*it).points[0]);
+		    qDebug()<<"applying friction due to relative velocity"<<endl;
+		    goto c;              // if friction is already applied do not apply it again
+		  }
+		  else if((*it).slipState[0] == Contact::BackwardSlipping) {
+		    // 
+		    RigidBody* firstBody = static_cast<RigidBody*>(fBody);
+		    firstBody->applyForce(frictionLimit*(*it).tangent, (*it).points[0]);
+		    qDebug()<<"applying friction due to relative velocity"<<endl;
+		    goto c;               // if friction has been applied do not apply again
+		  }
+		  
+		  Vector2d resultingForce = (*body)->force() + Vector2d(_constraintsInfo.force[offset], _constraintsInfo.force[offset+1]);
+		  
+		  if(frictionLimit > abs((*it).tangent.dot(resultingForce)))
+		    applicableForce = ((*it).tangent.dot(resultingForce))*((*it).tangent);
+		  else 
+		    applicableForce = frictionLimit*((*it).tangent);		    
+		    
+		  if((*it).tangent.dot(resultingForce) > 0) 
+		    applicableForce = -applicableForce;
+		  else if((*it).tangent.dot(resultingForce) < 0)
+		    applicableForce = applicableForce;
+		  else
+		    applicableForce.setZero();
+		 /*   
+		  if(fbody->metaObject()->inherits<Particle>()) {
+		      Particle* p = static_cast<Particle*>(fBody);
+		      p->applyForce(-applicableForce);
+		    }
+		    else if(fBody->metaObject()->inherits<RigidBody>()) {*/
+		      RigidBody* firstBody = static_cast<RigidBody*>(fBody);
+		      firstBody->applyForce(Vector2d(-2,2), (*it).points[0]);
+		  //  }
+		    
+		 }
+	       } 
+	   c:	
+	   
+     	   // solve the joints here again to nullify the newly added 
+  	   // friction force.	   
+	     gatherJointsInfo(&_constraintsInfo);
+	     int state = _constraintSolver->solve(&_constraintsInfo);
+	     if(state != Solver::OK) return state;                                                      
+	   (*body)->addForce(&_constraintsInfo.force[offset], NULL);
+	   (*body)->getAccelerations(f+_variablesCount+offset, NULL);
+           offset += (*body)->variablesCount();
           }
-	  }
+	}
       }
-
     return 0;
 }
 
