@@ -7,10 +7,11 @@
 #include "vector.h"
 #include "particle.h"
 #include "rigidbody.h"
+#include "joint.h"
 
 namespace StepCore {
   
-
+/*
 class PulleyCord;  
 class PulleyCordErrors : public ObjectErrors
 {
@@ -28,7 +29,7 @@ public:
   
   Vector2d cord2Variance() const { return _cord2Variance; }
   void setCord2Variance(const Vector2d cord2Variance) { _cord2Variance = cord2Variance; }
-  */
+  
   Vector2d localPosition1Variance() const { return _localPosition1Variance; }
   void setLocalPosition1Variance(const Vector2d var) { _localPosition1Variance = var; }
   
@@ -53,17 +54,18 @@ protected:
   friend class PulleyCord;
   
 };
-
-class PulleyCord : public Item, public Force
+*/
+class PulleyCord : public Item, public Joint
 {
   STEPCORE_OBJECT(PulleyCord)
 public:
-   explicit PulleyCord(Vector2d position=Vector2d(5,0), double radius=1,Item* body1=0, Item* body2=0);
+   explicit PulleyCord(Vector2d position=Vector2d(0,0), double radius=1,Item* body1= NULL, Item* body2= NULL);
                       
   ~PulleyCord() {}
   
-  void calcForce(bool calcVariance);
-  
+  int constraintsCount();
+  void getConstraintsInfo(ConstraintsInfo* info, int offset);
+
   Vector2d position() const { return _position; }
   void setPosition(const Vector2d position) { _position = position; }
   

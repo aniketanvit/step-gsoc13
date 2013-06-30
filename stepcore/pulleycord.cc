@@ -23,20 +23,20 @@ namespace StepCore {
 		       QT_TR_NOOP("Local position 2 of Cord2 on Body2"), localPosition2, setLocalPosition2)
      //STEPCORE_PROPERTY_R_D(double, tension, QT_TRANSLATE_NOOP("PropertyName", "tension"), QT_TRANSLATE_NOOP("Units", "N"), QT_TR_NOOP("Tension in the Cords"), tension)
   )  
-  
+  /*
   STEPCORE_META_OBJECT(PulleyCordErrors, QT_TRANSLATE_NOOP("ObjectClass", "PulleyCordErrors"), QT_TR_NOOP("Errors class for PulleyCord"), 0, 
      STEPCORE_SUPER_CLASS(ObjectErrors), 
      STEPCORE_PROPERTY_RW(StepCore::Vector2d, localPosition1Variance, QT_TRANSLATE_NOOP("PropertyName", "localPosition1Variance"), QT_TRANSLATE_NOOP("Units", "m"),
 	               QT_TR_NOOP("Local position 1 variance"), localPosition1Variance, setLocalPosition1Variance)
      STEPCORE_PROPERTY_RW(StepCore::Vector2d, localPosition2Variance, QT_TRANSLATE_NOOP("PropertyName", "localPosition2Variance"), QT_TRANSLATE_NOOP("Units", "m"),
 	               QT_TR_NOOP("Local position 2 variance"), localPosition2Variance, setLocalPosition2Variance)
-     /*STEPCORE_PROPERTY_R_D(StepCore::Vector2d, position1Variance, QT_TRANSLATE_NOOP("PropertyName", "position1Variance"), QT_TRANSLATE_NOOP("Units", "m"),
+     STEPCORE_PROPERTY_R_D(StepCore::Vector2d, position1Variance, QT_TRANSLATE_NOOP("PropertyName", "position1Variance"), QT_TRANSLATE_NOOP("Units", "m"),
 			   QT_TR_NOOP("Position 2 variance"), position1Variance)
      STEPCORE_PROPERTY_R_D(StepCore::Vector2d, position2Variance, QT_TRANSLATE_NOOP("PropertyName", "position2Variance"), QT_TRANSLATE_NOOP("Units", "m"),
 			   QT_TR_NOOP("Position 2 variance"), position2Variance)*/
   )
   
-  
+ /* 
 PulleyCord* PulleyCordErrors::pulleyCord()
 {
   return static_cast<PulleyCord*>(owner());
@@ -61,7 +61,7 @@ StepCore::Vector2d PulleyCordErrors::position2Variance()
   
   return _localPosition2Variance;
 }
-
+*/
 PulleyCord::PulleyCord(Vector2d position, double radius, Item* body1, Item* body2) :
                      _position(position), _radius(radius)
 {
@@ -121,7 +121,7 @@ void PulleyCord::setBody2(Object* body2)
     _p2 = NULL;
     _r2 = NULL;  
 }
-
+/*
 void PulleyCord::calcForce(bool calcVariance)
 {
   double leftForce = 0;
@@ -237,6 +237,16 @@ void PulleyCord::calcForce(bool calcVariance)
     // errors calculation to be done...
     
   }
+  
+}
+*/
+int PulleyCord::constraintsCount()
+{
+  return 3;
+}
+
+void PulleyCord::getConstraintsInfo(ConstraintsInfo* info, int offset)
+{
   
 }
 
