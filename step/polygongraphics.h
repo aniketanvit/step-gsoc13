@@ -98,7 +98,6 @@ protected:
 class Ui::WidgetCreateRigidBodyItems;
 
 class RigidBodyKDialog;
-
 class RigidBodyMenuHandler : public ItemMenuHandler
 {
   Q_OBJECT
@@ -114,9 +113,9 @@ public slots:
 protected slots:
   bool createRigidBodyApply();
 protected:
-  
+  StepCore::RigidBody* rigidBody() const;
   Ui::WidgetCreateRigidBodyItems*    _createRigidBodyUi;
-  RigidBodyKDialog*                        _createRigidBodyDialog;
+  RigidBodyKDialog*                  _createRigidBodyDialog;
   
   friend class RigidBodyKDialog;
   

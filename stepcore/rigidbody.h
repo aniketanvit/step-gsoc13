@@ -157,9 +157,9 @@ public:
     };
 
     /** Constructs RigidBody */
-    explicit RigidBody(Vector2d position = Vector2d::Zero(), double angle = 0,
+    explicit RigidBody(Vector2d position = Vector2d::Zero(), double angle = 0, double area = 1,
               Vector2d velocity = Vector2d::Zero(), double angularVelocity = 0,
-              double mass = 1, double inertia = 1, double charge = 10);
+              double mass = 1, double inertia = 1, double charge = 0, double massDensity = 1, double chargeDensity = 0);
 
     /** Get position of the center of mass of the body  */
     const Vector2d& position() const { return _position; }
@@ -171,6 +171,8 @@ public:
     /** Set angle of the body */
     void setAngle(double angle) { _angle = angle; }
 
+    double area() const { return _area; }
+    void setArea(const double area) { _area = area; setMass(_area*_massDensity) ; }
     /** Get velocity of the center of mass of the body */
     const Vector2d& velocity() const { return _velocity; }
     /** Set velocity of the particle */
@@ -212,7 +214,7 @@ public:
     /** Get mass of the body */
     double mass() const { return _mass; }
     /** Set mass of the body */
-    void   setMass(double mass) { _mass = mass; }
+    void   setMass(double mass) { _mass = mass; _massDensity = _mass/_area; }
 
     /** Get inertia "tensor" of the body */
     double inertia() const { return _inertia; }
@@ -267,14 +269,18 @@ public:
         return static_cast<RigidBodyErrors*>(objectErrors()); }
         
         
-    double massDensity() { return _massDensity; }
+    double massDensity() const { return _massDensity; }
+    void setMassDensity(const double massDensity) { _massDensity = massDensity; _mass = _area*_massDensity; }
     
-    void setMassDensity(double massDensity) { _massDensity = massDensity; }
+    double charge() const { return _charge; }
+    void setCharge(const double charge) { _charge = charge; _chargeDensity = _charge/_area; }
     
-    double charge() { return _charge; }
-    
-    void setCharge(double charge) { _charge = charge; }
-    
+    double chargeDensity() const { return _chargeDensity; }
+    void setChargeDensity(const double chargeDensity)
+    {
+      _chargeDensity = chargeDensity;
+      _charge = _chargeDensity*_area;
+    }
     void findCenterOfCharge();
 
 protected:
@@ -282,7 +288,8 @@ protected:
 
     Vector2d _position;
     double   _angle;
-
+    double _area;
+    
     Vector2d _velocity;
     double   _angularVelocity;
 
@@ -294,6 +301,7 @@ protected:
     double   _inertia;
     
     double _charge;
+    double _chargeDensity;
     Vector2d _centerOfCharge;        //just like Center of mass but it is for charge
                                      // will be found out after integration of the charge-distribution.
     friend class RigidBodyErrors;
@@ -307,16 +315,17 @@ class Disk: public RigidBody
     STEPCORE_OBJECT(Disk)
 public:
     /** Constructs Disk */
-    explicit Disk(Vector2d position = Vector2d::Zero(), double angle = 0,
+    explicit Disk(Vector2d position = Vector2d::Zero(), double angle = 0, double area = 1,
               Vector2d velocity = Vector2d::Zero(), double angularVelocity = 0,
-              double mass = 1, double inertia = 1, double radius = 0.5)
-        : RigidBody(position, angle, velocity, angularVelocity, mass, inertia),
+              double mass = 1, double inertia = 1, double charge = 0, double massDensity = 1,
+	      double chargeDensity = 0, double radius = 0.5)
+        : RigidBody(position, angle, area, velocity, angularVelocity, mass, inertia, charge, massDensity, chargeDensity),
           _radius(radius) {}
 
     /** Get disk radius */
     double radius() const { return _radius; }
     /** Set disk radius */
-    void setRadius(double radius) { _radius = radius; }
+    void setRadius(double radius) { _radius = radius; setArea(3.14*_radius*_radius); }
 
 protected:
     double _radius;
@@ -330,10 +339,10 @@ class BasePolygon: public RigidBody
     STEPCORE_OBJECT(BasePolygon)
 public:
     /** Constructs BasePolygon */
-    explicit BasePolygon(Vector2d position = Vector2d::Zero(), double angle = 0,
+    explicit BasePolygon(Vector2d position = Vector2d::Zero(), double angle = 0, double area = 1,
               Vector2d velocity = Vector2d::Zero(), double angularVelocity = 0,
-              double mass = 1, double inertia = 1)
-        : RigidBody(position, angle, velocity, angularVelocity, mass, inertia) {}
+              double mass = 1, double inertia = 1, double charge = 0, double massDensity = 1, double chargeDensity = 0)
+        : RigidBody(position, angle, area, velocity, angularVelocity, mass, inertia, charge, massDensity, chargeDensity) {}
 
     /** Get vertex list (constant) */
     const Vector2dList& vertexes() const { return _vertexes; }
@@ -347,9 +356,10 @@ class Box: public BasePolygon
     STEPCORE_OBJECT(Box)
 public:
     /** Constructs Box */
-    explicit Box(Vector2d position = Vector2d::Zero(), double angle = 0,
+    explicit Box(Vector2d position = Vector2d::Zero(), double angle = 0, double area =1,
               Vector2d velocity = Vector2d::Zero(), double angularVelocity = 0,
-              double mass = 1, double inertia = 1, Vector2d size = Vector2d(1,1));
+              double mass = 1, double inertia = 1, double charge = 0, 
+	      double massDensity =1, double chargeDensity = 0, Vector2d size = Vector2d(1,1));
 
     /** Get box size */
     Vector2d size() const { return Vector2d(_vertexes[1][0] - _vertexes[0][0],

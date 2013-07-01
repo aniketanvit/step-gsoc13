@@ -42,7 +42,8 @@ STEPCORE_META_OBJECT(RigidBody, QT_TRANSLATE_NOOP("ObjectClass", "RigidBody"), Q
         STEPCORE_PROPERTY_R_D(double, torque, QT_TRANSLATE_NOOP("PropertyName", "torque"), QT_TRANSLATE_NOOP("Units", "N m"), QT_TR_NOOP("Torque that acts upon the body"), torque)
 
         STEPCORE_PROPERTY_RW(double, mass, QT_TRANSLATE_NOOP("PropertyName", "mass"), QT_TRANSLATE_NOOP("Units", "kg"), QT_TR_NOOP("Total mass of the body"), mass, setMass)
-	//STEPCORE_PROPERTY_RW(double, charge, QT_TRANSLATE_NOOP("PropertyName", "charge"), QT_TRANSLATE_NOOP("Units", "C"), QT_TR_NOOP("Total charge on the body"), charge, setCharge)
+	STEPCORE_PROPERTY_RW(double, charge, QT_TRANSLATE_NOOP("PropertyName", "charge"), QT_TRANSLATE_NOOP("Units", "C"), QT_TR_NOOP("Total charge on the body"), charge, setCharge)
+	STEPCORE_PROPERTY_RW(double, area, QT_TRANSLATE_NOOP("PropertyName", "area"), QT_TRANSLATE_NOOP("Units", "m²"), QT_TR_NOOP("Total area of the body"), area, setArea)
 	STEPCORE_PROPERTY_RW(double, inertia, QT_TRANSLATE_NOOP("PropertyName", "inertia"), STEPCORE_FROM_UTF8(QT_TRANSLATE_NOOP("Units", "kg m²")),
                                     QT_TR_NOOP("Inertia \"tensor\" of the body"), inertia, setInertia)
         STEPCORE_PROPERTY_RWF(StepCore::Vector2d, momentum, QT_TRANSLATE_NOOP("PropertyName", "momentum"), QT_TRANSLATE_NOOP("Units", "kg m/s"), QT_TR_NOOP("momentum"),
@@ -53,7 +54,10 @@ STEPCORE_META_OBJECT(RigidBody, QT_TRANSLATE_NOOP("ObjectClass", "RigidBody"), Q
                         StepCore::MetaProperty::DYNAMIC, kineticEnergy, setKineticEnergy)
 	STEPCORE_PROPERTY_RW(double, massDensity, QT_TRANSLATE_NOOP("PropertyName", "massDensity"),
 								    STEPCORE_FROM_UTF8(QT_TRANSLATE_NOOP("Units", "kg/m²")), QT_TR_NOOP("Mass Density of the Rigid Body"),
-			     massDensity, setMassDensity))
+			     massDensity, setMassDensity)
+	STEPCORE_PROPERTY_RW(double, chargeDensity, QT_TRANSLATE_NOOP("PropertyName", "chargeDensity"),
+								    STEPCORE_FROM_UTF8(QT_TRANSLATE_NOOP("Units", "C/m²")), QT_TR_NOOP("Charge Density of the Rigid Body"),
+								    chargeDensity, setChargeDensity))
 
 STEPCORE_META_OBJECT(RigidBodyErrors, QT_TRANSLATE_NOOP("ObjectClass", "RigidBodyErrors"), QT_TR_NOOP("Errors class for RigidBody"), 0, STEPCORE_SUPER_CLASS(ObjectErrors),
         STEPCORE_PROPERTY_RW_D(StepCore::Vector2d, positionVariance, QT_TRANSLATE_NOOP("PropertyName", "positionVariance"), QT_TRANSLATE_NOOP("Units", "m"),
@@ -180,10 +184,12 @@ void RigidBodyErrors::setKineticEnergyVariance(double kineticEnergyVariance)
     // XXX: change angularVelocity here as well
 }
 
-RigidBody::RigidBody(Vector2d position, double angle,
-        Vector2d velocity, double angularVelocity, double mass, double inertia)
-    : _position(position), _angle(angle), _velocity(velocity), _angularVelocity(angularVelocity),
-      _force(Vector2d::Zero()), _torque(0), _mass(mass), _inertia(inertia)
+RigidBody::RigidBody(Vector2d position, double angle, double area,
+        Vector2d velocity, double angularVelocity, double mass, double inertia, double charge,
+        double massDensity, double chargeDensity)
+    : _position(position), _angle(angle), _area(area), _velocity(velocity), _angularVelocity(angularVelocity),
+      _force(Vector2d::Zero()), _torque(0), _mass(mass), _inertia(inertia), _charge(charge), 
+      _massDensity(massDensity), _chargeDensity(chargeDensity)
 {
 }
 
@@ -358,10 +364,11 @@ void RigidBody::setKineticEnergy(double kineticEnergy)
     }
 }
 
-Box::Box(Vector2d position, double angle,
+Box::Box(Vector2d position, double angle, double area,
               Vector2d velocity, double angularVelocity,
-              double mass, double inertia, Vector2d size)
-    : BasePolygon(position, angle, velocity, angularVelocity, mass, inertia)
+              double mass, double inertia, double charge, double massDensity, 
+	 double chargeDensity, Vector2d size)
+    : BasePolygon(position, angle, area, velocity, angularVelocity, mass, inertia, charge, massDensity, chargeDensity)
 {
     _vertexes.resize(4);
     setSize(size);

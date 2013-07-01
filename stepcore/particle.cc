@@ -33,6 +33,7 @@ namespace StepCore
 																					  QT_TR_NOOP("acceleration"), acceleration)
 			  STEPCORE_PROPERTY_R_D(StepCore::Vector2d, force, QT_TRANSLATE_NOOP("PropertyName", "force"), QT_TRANSLATE_NOOP("Units", "N"), QT_TR_NOOP("force"), force)
 			  STEPCORE_PROPERTY_RW(double, mass, QT_TRANSLATE_NOOP("PropertyName", "mass"), QT_TRANSLATE_NOOP("Units", "kg"), QT_TR_NOOP("mass"), mass, setMass)
+			  STEPCORE_PROPERTY_RW(double, charge, QT_TRANSLATE_NOOP("PropertyName", "charge"), QT_TRANSLATE_NOOP("Units", "C"), QT_TR_NOOP("charge"), charge, setCharge)
 			  STEPCORE_PROPERTY_RWF(StepCore::Vector2d, momentum, QT_TRANSLATE_NOOP("PropertyName", "momentum"), QT_TRANSLATE_NOOP("Units", "kg m/s"), QT_TR_NOOP("momentum"),
 																					      StepCore::MetaProperty::DYNAMIC, momentum, setMomentum)
 			  STEPCORE_PROPERTY_RWF(double, kineticEnergy, QT_TRANSLATE_NOOP("PropertyName", "kineticEnergy"), QT_TRANSLATE_NOOP("Units", "J"), QT_TR_NOOP("kinetic energy"),
@@ -49,6 +50,8 @@ namespace StepCore
 																					       QT_TR_NOOP("force variance"), forceVariance)
 						STEPCORE_PROPERTY_RW(double, massVariance, QT_TRANSLATE_NOOP("PropertyName", "massVariance"), QT_TRANSLATE_NOOP("Units", "kg"),
 																				QT_TR_NOOP("mass variance"), massVariance, setMassVariance )
+						STEPCORE_PROPERTY_RW(double, chargeVariance, QT_TRANSLATE_NOOP("PropertyName", "chargeVariance"), QT_TRANSLATE_NOOP("Units", "C"),
+								     QT_TR_NOOP("charge variance"), chargeVariance, setChargeVariance )
 						STEPCORE_PROPERTY_RWF(StepCore::Vector2d, momentumVariance, QT_TRANSLATE_NOOP("PropertyName", "momentumVariance"), QT_TRANSLATE_NOOP("Units", "kg m/s"),
 																						     QT_TR_NOOP("momentum variance"), StepCore::MetaProperty::DYNAMIC, momentumVariance, setMomentumVariance)
 						STEPCORE_PROPERTY_RWF(double, kineticEnergyVariance, QT_TRANSLATE_NOOP("PropertyName", "kineticEnergyVariance"), QT_TRANSLATE_NOOP("Units", "J"),
@@ -94,8 +97,8 @@ namespace StepCore
 												    }
 						}
 						
-						Particle::Particle(Vector2d position, Vector2d velocity, double mass)
-						: _position(position), _velocity(velocity), _force(Vector2d::Zero()), _mass(mass)
+						Particle::Particle(Vector2d position, Vector2d velocity, double mass, double charge)
+						: _position(position), _velocity(velocity), _force(Vector2d::Zero()), _mass(mass), _charge(charge)
 						{
 						}
 						

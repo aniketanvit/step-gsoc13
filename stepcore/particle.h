@@ -43,7 +43,7 @@ public:
     /** Constructs ParticleErrors */
     ParticleErrors(Item* owner = 0)
         : ObjectErrors(owner), _positionVariance(0,0), _velocityVariance(0,0),
-          _forceVariance(0,0), _massVariance(0) {}
+          _forceVariance(0,0), _massVariance(0), _chargeVariance(0) {}
 
     /** Get owner as Particle */
     Particle* particle() const;
@@ -89,17 +89,17 @@ public:
     /** Set kinetic energy variance (will modify velocity variance) */
     void setKineticEnergyVariance(double kineticEnergyVariance);
     
-    double chargeVariance() { return _chargeVariance; }
+    double chargeVariance() const { return _chargeVariance; }
     
-    void setChargeVariance(double chargeVar) {_chargeVariance = chargeVar; }
+    void setChargeVariance(const double chargeVar) {_chargeVariance = chargeVar; }
 
 protected:
   
-    double _chargeVariance;
     Vector2d _positionVariance;
     Vector2d _velocityVariance;
     Vector2d _forceVariance;
     double _massVariance;
+    double _chargeVariance;
     friend class Particle;
 };
 
@@ -117,7 +117,7 @@ public:
 
     /** Constructs a particle */
     explicit Particle(Vector2d position = Vector2d::Zero(),
-            Vector2d velocity = Vector2d::Zero(), double mass = 1);
+            Vector2d velocity = Vector2d::Zero(), double mass = 1, double charge = 0);
 
     /** Get position of the particle */
     const Vector2d& position() const { return _position; }
@@ -166,9 +166,9 @@ public:
     void getInverseMass(VectorXd* inverseMass,
                         DynSparseRowMatrix* variance, int offset);
 
-    double charge() { return _charge; }
+    double charge() const { return _charge; }
     
-    void setCharge(double charge) { _charge = charge; }
+    void setCharge(const double charge) { _charge = charge; }
     /** Get (and possibly create) ParticleErrors object */
     ParticleErrors* particleErrors() {
         return static_cast<ParticleErrors*>(objectErrors()); }
@@ -176,11 +176,11 @@ public:
 protected:
     ObjectErrors* createObjectErrors() { return new ParticleErrors(this); }
 
-    double _charge;
     Vector2d _position;
     Vector2d _velocity;
     Vector2d _force;
     double _mass;
+    double _charge;
 };
 
 } // namespace StepCore

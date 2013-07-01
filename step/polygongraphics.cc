@@ -202,7 +202,9 @@ bool DiskCreator::sceneEvent(QEvent* event)
 	menuHandler->deleteLater();
 	
         double inertia = disk->mass() * radius*radius/2.0;
+	double area = 3.14*radius*radius;
         _worldModel->setProperty(_item, "radius", QVariant::fromValue(radius));
+	_worldModel->setProperty(_item, "area", QVariant::fromValue(area));
         _worldModel->setProperty(_item, "inertia", QVariant::fromValue(inertia));
         _worldModel->endMacro();
 
@@ -315,7 +317,7 @@ void RigidBodyMenuHandler::setupDialog()
   
   _createRigidBodyDialog = new RigidBodyKDialog(this); // XXX: parent?
   
-  _createRigidBodyDialog->setCaption(i18n("Create Disk"));
+  _createRigidBodyDialog->setCaption(i18n("Create RigidBody"));
   _createRigidBodyDialog->setButtons(KDialog::Ok | KDialog::Cancel);
   
   _createRigidBodyUi= new Ui::WidgetCreateRigidBodyItems;
@@ -334,15 +336,17 @@ void RigidBodyMenuHandler::setupDialog()
     delete _createRigidBodyUi; _createRigidBodyUi = 0;
 }
 
+inline StepCore::RigidBody* RigidBodyMenuHandler::rigidBody() const
+{
+  return static_cast<StepCore::RigidBody*>(_object); 
+}
 
 bool RigidBodyMenuHandler::createRigidBodyApply()
 {
-  
-  
+  rigidBody()->setMassDensity(_createRigidBodyUi->_massLineEdit->text().toDouble());
+  rigidBody()->setChargeDensity(_createRigidBodyUi->_chargeLineEdit->text().toDouble());
   return true;
-  
-  
-  
+
 }
 
 
@@ -496,6 +500,8 @@ void PolygonCreator::fixInertia()
 
     inertia = fabs(inertia * mass); // 1 = 1m XXX XXX XXX
     _worldModel->setProperty(_item, "inertia", QVariant::fromValue(inertia));
+    _worldModel->setProperty(_item, "area", QVariant::fromValue(area));
+  
 }
 
 void PolygonCreator::start()
