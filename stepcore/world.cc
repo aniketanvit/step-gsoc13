@@ -962,7 +962,7 @@ inline int World::solverFunction(double t, const double* y,
 		    
 		    RigidBody* firstBody = static_cast<RigidBody*>(fBody);
 		    if(firstBody->velocityWorld((*it).points[0]).dot((*it).tangent) > 0)
-		    {firstBody->applyForce(frictionLimit*((*it).tangent), (*it).points[0]);
+		    {firstBody->applyForce(frictionLimit*((*it).tangent), (*it).points[0]);}
 		    else
 		      firstBody->applyForce(-frictionLimit*((*it).tangent), (*it).points[0]);
 		    qDebug()<<"applying friction due to relative velocity"<<endl;
