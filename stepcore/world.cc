@@ -920,15 +920,15 @@ inline int World::solverFunction(double t, const double* y,
 	  for(BodyList::iterator body = _bodies.begin(); body != b_end; ++body) {
 	    
 	    for(it = _collisionSolver->_contacts.begin(); it != c_end; it++) {
-	      //take the value of force acting on the body before applying constraints.
+	      //find the value of force acting on the body before applying constraints.
 	      if((*(*body)).variablesOffset() == (*(*it).body0).variablesOffset() || 
 		(*(*body)).variablesOffset() == (*(*it).body1).variablesOffset()) 
 	      {
 		Vector2d currentForce = (*body)->force();
 	        Vector2d constraintForce(_constraintsInfo.force[offset], _constraintsInfo.force[offset+1]);
-		if(constraintForce.dot((*it).normal) > (*it).normalForce)
-		  (*it).normalForce = constraintForce.dot((*it).normal);
-	         
+		if(fabs(constraintForce.dot((*it).normal)) > (*it).normalForce)
+		  (*it).normalForce = fabs(constraintForce.dot((*it).normal));
+	         //qDebug()<<"normal force = "<<(*it).normalForce<<endl;
 	      }
 	      offset += (*body)->variablesCount();
 	    }
@@ -945,45 +945,49 @@ inline int World::solverFunction(double t, const double* y,
 		if((*it).state == Contact::Contacted)
 		{ 
 		  Body* fBody = 0;
-		  Vector2d applicableForce(0,0);
+		  Vector2d applicableForce(0,0); double applicableForceMagnitude = 0;
 		  if((*(*body)).variablesOffset() == (*(*it).body0).variablesOffset())
 		  { fBody = (*it).body0;	 qDebug()<<"firstBody"<<endl; qDebug()<<(*it).tangent[0]<<"  "<<(*it).tangent[1]<<endl; }
 		  else if((*(*body)).variablesOffset() == (*(*it).body1).variablesOffset())
 		  { fBody = (*it).body0;       qDebug()<<"secondbody"<<endl; qDebug()<<(*it).tangent[0]<<"  "<<(*it).tangent[1]<<endl; }
 		  else continue;
 		  
-		  Vector2d  contactForce(_constraintsInfo.force[offset], _constraintsInfo.force[offset+1]);
-		  double frictionLimit =  2*(*it).normalForce; qDebug()<<"FrictionLimit="<<frictionLimit<<endl;
+		  //Vector2d  contactForce(_constraintsInfo.force[offset], _constraintsInfo.force[offset+1]);
+		  double frictionLimit =  1*(*it).normalForce; //qDebug()<<"FrictionLimit="<<frictionLimit<<endl;
 		  // slipping part here...
 		  
-		  if((*it).slipState[0] == Contact::ForwardSlipping) {
+		  if((*it).slipState[0] == Contact::ForwardSlipping || (*it).slipState[0] == Contact::BackwardSlipping) {
 		    // check with the direction of the tangent
 		    // and apply friction in the right direction . Consider particles as well 
 		    
 		    RigidBody* firstBody = static_cast<RigidBody*>(fBody);
-		    firstBody->applyForce(frictionLimit*(*it).tangent, (*it).points[0]);
+		    if(firstBody->velocityWorld((*it).points[0]).dot((*it).tangent) > 0)
+		    {firstBody->applyForce(frictionLimit*((*it).tangent), (*it).points[0]);
+		    else
+		      firstBody->applyForce(-frictionLimit*((*it).tangent), (*it).points[0]);
 		    qDebug()<<"applying friction due to relative velocity"<<endl;
 		    goto c;              // if friction is already applied do not apply it again
-		  }
+		  }/*
 		  else if((*it).slipState[0] == Contact::BackwardSlipping) {
 		    // 
 		    RigidBody* firstBody = static_cast<RigidBody*>(fBody);
+		    if()
 		    firstBody->applyForce(frictionLimit*(*it).tangent, (*it).points[0]);
 		    qDebug()<<"applying friction due to relative velocity"<<endl;
 		    goto c;               // if friction has been applied do not apply again
-		  }
+		  }*/
 		  
 		  Vector2d resultingForce = (*body)->force() + Vector2d(_constraintsInfo.force[offset], _constraintsInfo.force[offset+1]);
 		  
-		  if(frictionLimit > abs((*it).tangent.dot(resultingForce)))
-		    applicableForce = ((*it).tangent.dot(resultingForce))*((*it).tangent);
+		  if(frictionLimit > fabs((*it).tangent.dot(resultingForce)))
+		    applicableForceMagnitude = fabs((*it).tangent.dot(resultingForce));
 		  else 
-		    applicableForce = frictionLimit*((*it).tangent);		    
+		    applicableForceMagnitude = frictionLimit;		    
 		    
 		  if((*it).tangent.dot(resultingForce) > 0) 
-		    applicableForce = -applicableForce;
+		    applicableForce = -applicableForceMagnitude*((*it).tangent);
 		  else if((*it).tangent.dot(resultingForce) < 0)
-		    applicableForce = applicableForce;
+		    applicableForce = applicableForceMagnitude*((*it).tangent);
 		  else
 		    applicableForce.setZero();
 		 /*   
@@ -993,7 +997,7 @@ inline int World::solverFunction(double t, const double* y,
 		    }
 		    else if(fBody->metaObject()->inherits<RigidBody>()) {*/
 		      RigidBody* firstBody = static_cast<RigidBody*>(fBody);
-		      firstBody->applyForce(Vector2d(-2,2), (*it).points[0]);
+		      firstBody->applyForce(applicableForce, (*it).points[0]);
 		  //  }
 		    
 		 }
@@ -1001,7 +1005,7 @@ inline int World::solverFunction(double t, const double* y,
 	   c:	
 	   
      	   // solve the joints here again to nullify the newly added 
-  	   // friction force.	   
+  	   // friction force on jointed-objects .	   
 	     gatherJointsInfo(&_constraintsInfo);
 	     int state = _constraintSolver->solve(&_constraintsInfo);
 	     if(state != Solver::OK) return state;                                                      
