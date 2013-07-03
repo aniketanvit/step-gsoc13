@@ -37,7 +37,7 @@ public:
   void paint(QPainter *painter, const QStyleOptionGraphicsItem* option, QWidget* widget);
   StepCore::PulleyCord* pulleyCord() const {
     return static_cast<StepCore::PulleyCord*>(_item); }
-  //void mouseSetPos(const QPointF& pos, const QPointF& diff, MovingState);
+  void mouseSetPos(const QPointF& pos, const QPointF& diff, MovingState);
   void viewScaleChanged();
   void stateChanged();
   void worldDataChanged(bool dynamicOnly);

@@ -9,7 +9,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QItemSelectionModel>
 #include <KLocale> 
-
+#include <QDebug>
 bool PulleyCordCreator::sceneEvent(QEvent* event)
 {
   QGraphicsSceneMouseEvent* mouseEvent = static_cast<QGraphicsSceneMouseEvent*>(event); 
@@ -21,10 +21,10 @@ bool PulleyCordCreator::sceneEvent(QEvent* event)
     _worldModel->beginMacro(i18n("Create %1", _worldModel->newItemName(_className)));
     _item = _worldModel->createItem(_className); Q_ASSERT(_item != NULL);
     _worldModel->setProperty(_item, "position", vpos);
-    
+    qDebug()<<" pulley created"<<endl;
     _worldModel->selectionModel()->setCurrentIndex(_worldModel->objectIndex(_item),
 						   QItemSelectionModel::ClearAndSelect);
-    _worldModel->addItem(_item);
+    _worldModel->addItem(_item); qDebug()<<" pulley added to world"<<endl;
     showMessage(MessageFrame::Information,
 		i18n("Move mouse and release left mouse button to define a radius of the %1", classNameTr()));
     
@@ -101,20 +101,11 @@ PulleyCordGraphicsItem::PulleyCordGraphicsItem(StepCore::Item* item, WorldModel*
   Q_ASSERT(dynamic_cast<StepCore::PulleyCord*>(_item) != NULL);
   setFlag(QGraphicsItem::ItemIsSelectable);
   setFlag(QGraphicsItem::ItemIsMovable);
-  setZValue(FORCE_ZVALUE);
+  setZValue(JOINT_ZVALUE);
 }
 
 QPainterPath PulleyCordGraphicsItem::shape() const
 {
-  double s = currentViewScale();
-  double radius = pulleyCord()->radius();
-  if(radius > 1/s) {
-    _painterPath.addEllipse(-radius, -radius, 2*radius, 2*radius);
-    //_painterPath = QMatrix().rotate(disk()->angle() * 180 / StepCore::Constants::Pi).map(_painterPath);
-  } else {
-    _painterPath.addEllipse(-1/s, -1/s, 2/s, 2/s);
-  }
-      _painterPath = QMatrix().map(_painterPath);
   return _painterPath;
 }
 
@@ -122,34 +113,10 @@ void PulleyCordGraphicsItem::paint(QPainter* painter, const QStyleOptionGraphics
 {
   //painter->setPen(QPen(Qt::blue));
   QColor color(Qt::blue);
-  painter->setPen(Qt::NoPen);
+  painter->setPen(Qt::red);
   painter->setBrush(QBrush(color));
-  
-  StepCore::Vector2d p1c, p2c;
-  StepCore::Vector2d lCord, rCord;
-  if(pulleyCord()->rigidBody1()) p1c = pulleyCord()->rigidBody1()->position();
-  else if(pulleyCord()->particle1()) p1c = pulleyCord()->particle1()->position();
-  else p1c = pulleyCord()->position1();
-  
-  if(pulleyCord()->rigidBody2()) p2c = pulleyCord()->rigidBody2()->position();
-  else if(pulleyCord()->particle2()) p2c = pulleyCord()->particle2()->position();
-  else p2c = pulleyCord()->position2();
-  
-  StepCore::Vector2d lEnd(pulleyCord()->position()[0]-pulleyCord()->radius(), pulleyCord()->position()[1]);
-  StepCore::Vector2d rEnd(pulleyCord()->position()[0]+pulleyCord()->radius(), pulleyCord()->position()[1]);
-  
-  //painter->drawEllipse(lEnd[0], lEnd[1]-pulleyCord()->radius(), pulleyCord()->radius()*2, pulleyCord()->radius()*2 );
-  painter->drawPath(_painterPath);
-  StepCore::Vector2d l(lEnd - p1c);
-    double lDist = l.norm();
-  lCord = lDist*lCord;
-  StepCore::Vector2d r(rEnd - p2c);
-  double rDist = r.norm();
-  rCord = rCord*rDist;
-  
-  painter->drawLine(vectorToPoint(lEnd), vectorToPoint(lEnd+lCord));
-  painter->drawLine(vectorToPoint(rEnd), vectorToPoint(rEnd+rCord));
-  
+  double radius = pulleyCord()->radius();
+  painter->drawEllipse(QRectF(-radius, -radius, 2*radius, 2*radius));
   /*
    if(isSelected()) {
       painter->setRenderHint(QPainter::Antialiasing, true);
@@ -162,7 +129,7 @@ void PulleyCordGraphicsItem::paint(QPainter* painter, const QStyleOptionGraphics
 void PulleyCordGraphicsItem::worldDataChanged(bool dynamicOnly)
 {
   Q_UNUSED(dynamicOnly)
-  setPos(vectorToPoint(pulleyCord()->position1()));
+  //setPos(vectorToPoint(pulleyCord()->position()));
   viewScaleChanged();
   update();
 }
@@ -181,9 +148,9 @@ void PulleyCordGraphicsItem::stateChanged()
   viewScaleChanged();
   update();
 }
-/*
-void PulleyCordGraphicsItem::mouseSetPos(const QPointF& /*pos, const QPointF& diff, MovingState)
-{
+
+void PulleyCordGraphicsItem::mouseSetPos(const QPointF& pos, const QPointF& diff, MovingState)
+{/*
   _worldModel->simulationPause();
   
   if(pulleyCord()->body1()) {
@@ -216,7 +183,7 @@ void PulleyCordGraphicsItem::mouseSetPos(const QPointF& /*pos, const QPointF& di
 	_worldModel->setProperty(_item, "localPosition2",
 				 QVariant::fromValue( (spring()->position2() + pointToVector(diff)).eval() ));
       }*/
-//}
+}
 
 void PulleyCordGraphicsItem::viewScaleChanged()
 {
@@ -225,15 +192,12 @@ void PulleyCordGraphicsItem::viewScaleChanged()
   _painterPath.setFillRule(Qt::WindingFill);
   
   double s = currentViewScale();
-  double radius = pulleyCord()->radius();
-  if(radius > 1/s) {
+  double radius = pulleyCord()->radius()/s;
+  QPointF pos = WorldGraphicsItem::vectorToPoint(pulleyCord()->position());
+  
     _painterPath.addEllipse(-radius, -radius, 2*radius, 2*radius);
-    //_painterPath = QMatrix().rotate(disk()->angle() * 180 / StepCore::Constants::Pi).map(_painterPath);
-  } else {
-    _painterPath.addEllipse(-1/s, -1/s, 2/s, 2/s);
-  }
-    _painterPath = QMatrix().map(_painterPath);
-    _boundingRect = _painterPath.boundingRect();
+    _boundingRect = QRectF(pos.x()-radius, pos.y()-radius, 2*radius, 2*radius).normalized();
+    _boundingRect.adjust(0.2,0.2,0.2,0.2);
   
   
 }

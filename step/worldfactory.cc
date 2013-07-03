@@ -131,7 +131,7 @@ WorldFactory::WorldFactory()
     __REGISTER_EXT(SoftBodyParticle, ItemCreator, SoftBodyParticleGraphicsItem, ItemMenuHandler);
     __REGISTER_EXT(SoftBody, SoftBodyCreator, SoftBodyGraphicsItem, SoftBodyMenuHandler);
 
-    __REGISTER_EXT_E(PulleyCord, PulleyCordCreator, PulleyCordGraphicsItem, ItemMenuHandler);
+    __REGISTER_EXT(PulleyCord, PulleyCordCreator, PulleyCordGraphicsItem, ItemMenuHandler);
     __REGISTER_EXT_E(Spring, SpringCreator, SpringGraphicsItem, ItemMenuHandler);
     __REGISTER_EXT(LinearMotor, LinearMotorCreator, LinearMotorGraphicsItem, ItemMenuHandler);
     __REGISTER_EXT(CircularMotor, CircularMotorCreator, CircularMotorGraphicsItem, ItemMenuHandler);
