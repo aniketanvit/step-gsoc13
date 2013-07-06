@@ -44,7 +44,8 @@ class Body;
 struct Contact {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
    // provide a constructor to initialise the values of the coefficients to zer
-    
+    Contact() _restitutionCoefficient(1), _frictionCoefficient(0){}
+    ~Contact() {}
     enum {
         Unknown = 0,    /**< Contact state was not (can not) be determined
                              (if state == Unknown all other fields are not used) */
