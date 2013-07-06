@@ -44,7 +44,7 @@ class Body;
 struct Contact {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
    // provide a constructor to initialise the values of the coefficients to zer
-    Contact() _restitutionCoefficient(1), _frictionCoefficient(0){}
+    Contact(): _restitutionCoefficient(1), _frictionCoefficient(0) {}
     ~Contact() {}
     enum {
         Unknown = 0,    /**< Contact state was not (can not) be determined
@@ -90,8 +90,6 @@ struct Contact {
     // Cached values from previous run
     // TODO: move it to GJK-specific derived struct
     int _w1[2];
-    void setf(const double f) { _frictionCoefficient = f; }
-    void setr(const double r) { _restitutionCoefficient = r; }
 };
 
 typedef std::vector<Contact, Eigen::aligned_allocator<Contact> > ContactValueList;

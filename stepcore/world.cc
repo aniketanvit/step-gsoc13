@@ -946,7 +946,7 @@ inline int World::solverFunction(double t, const double* y,
 		  else continue;
 		  
 		  //Vector2d  contactForce(_constraintsInfo.force[offset], _constraintsInfo.force[offset+1]);
-		  double frictionLimit =  1*(*it).normalForce; //qDebug()<<"FrictionLimit="<<frictionLimit<<endl;
+		  double frictionLimit =  (*it)._frictionCoefficient*(*it).normalForce; //qDebug()<<"FrictionLimit="<<frictionLimit<<endl;
 		  // slipping part here...
 		  
 		  if((*it).slipState[0] == Contact::ForwardSlipping || (*it).slipState[0] == Contact::BackwardSlipping) {
