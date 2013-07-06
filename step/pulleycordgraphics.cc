@@ -60,7 +60,7 @@ bool PulleyCordCreator::sceneEvent(QEvent* event)
 }
 
 
-/*
+
 PulleyCordHandlerGraphicsItem::PulleyCordHandlerGraphicsItem(StepCore::Item* item, WorldModel* worldModel, 
 						     QGraphicsItem* parent, int num): WorldGraphicsItem(item, 
 						      worldModel, parent), _num(num)
@@ -69,8 +69,13 @@ PulleyCordHandlerGraphicsItem::PulleyCordHandlerGraphicsItem(StepCore::Item* ite
   setFlag(QGraphicsItem::ItemIsMovable);
   setZValue(HANDLER_ZVALUE);
   setExclusiveMoving(true);
-  setExclusiveMovingMessage(i18n("Move end of %1", _item->name()));
-  setPos(0, 0);  
+  setExclusiveMovingMessage(i18n("Move cord of %1", _item->name()));
+  double radius = (pulleyCord()->radius());
+  if(_num == 1){
+    setPos(-(radius)*cos(pulleyCord()->angle()), radius*sin(pulleyCord()->angle()));
+  }else if(_num == 2){
+    setPos((radius)*cos(pulleyCord()->angle()), -radius*sin(pulleyCord()->angle()));
+  }
 }
 
 void PulleyCordHandlerGraphicsItem::viewScaleChanged()
@@ -82,19 +87,22 @@ void PulleyCordHandlerGraphicsItem::viewScaleChanged()
 
 void PulleyCordHandlerGraphicsItem::worldDataChanged(bool)
 {
- // if(_num == 2) /// this will need to be reimplemented
-    setPos(vectorToPoint(static_cast<StepCore::PulleyCord*>(_item)->position2()-
-                         static_cast<StepCore::PulleyCord*>(_item)->position1()));
+ if(_num == 1){
+    setPos(vectorToPoint(static_cast<StepCore::PulleyCord*>(_item)->position1()));
+ }else if(_num == 2) {
+    setPos(vectorToPoint(static_cast<StepCore::PulleyCord*>(_item)->position2()));
+ }
+                        
 }
 
-void PulleyCordHandlerGraphicsItem::mouseSetPos(const QPointF& pos, const QPointF&, MovingState movingState)
+void PulleyCordHandlerGraphicsItem::mouseSetPos(const QPointF& pos, const QPointF& diff, MovingState movingState)
 {
   static_cast<WorldScene*>(scene())->snapItem(parentItem()->mapToParent(pos),
 			   WorldScene::SnapParticle | WorldScene::SnapRigidBody |
 			   WorldScene::SnapSetLocalPosition, 0, movingState, _item, _num);
   
 }
-*/
+
 PulleyCordGraphicsItem::PulleyCordGraphicsItem(StepCore::Item* item, WorldModel* worldModel)
                            : WorldGraphicsItem(item, worldModel)
 {

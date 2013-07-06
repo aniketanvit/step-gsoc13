@@ -16,7 +16,7 @@ class PulleyCord : public Item, public Joint
   STEPCORE_OBJECT(PulleyCord)
   
 public:
-   explicit PulleyCord(Vector2d position=Vector2d::Zero(), double radius=1);
+   explicit PulleyCord(Vector2d position=Vector2d::Zero(), double radius=1, double angle = 0);
   
   int constraintsCount();
   void getConstraintsInfo(ConstraintsInfo* info, int offset);
@@ -24,8 +24,11 @@ public:
   Vector2d position() const { return _position; }
   void setPosition(const Vector2d position) { _position = position; }
   
-  //Vector2d position1() const;
-  //Vector2d position2() const;
+  Vector2d position1() const;
+  Vector2d position2() const;
+  
+  Vector2d velocity1() const;
+  Vector2d velocity2() const;
   
   double radius() const { return _radius; }
   void setRadius(const double radius) { _radius = radius; }
@@ -35,8 +38,7 @@ public:
   
   double tension() const { return _tension; }
   void setTension(const double tension) { _tension = tension; }
-  
-  
+
   Vector2d localPosition1() const { return _localPosition1; }
   void setLocalPosition1(const Vector2d localPosition1) { _localPosition1 = localPosition1; }
   
@@ -61,9 +63,6 @@ protected:
   Vector2d _position;
   double _radius;
   double _angle; // so that the pulley-system can be fixed at an angle  
-  
-  Object* _body1;
-  Object* _body2;
     
   double _lengthOfCord;
   
@@ -73,11 +72,16 @@ protected:
   Vector2d _localPosition1;
   Vector2d _localPosition2;
   
+  Object* _body1;
+  Object* _body2;
+  
   Particle*  _p1;
   Particle*  _p2;
   RigidBody* _r1;
   RigidBody* _r2;
   
+  Vector2d end1;
+  Vector2d end2;
 };
 
 }

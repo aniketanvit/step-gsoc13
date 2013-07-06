@@ -12,7 +12,7 @@ public:
 
   bool sceneEvent(QEvent* event);                
 };
-/*
+
 class PulleyCordHandlerGraphicsItem : public WorldGraphicsItem
 {
 public:
@@ -22,11 +22,13 @@ public:
   void mouseSetPos(const QPointF& pos, const QPointF&, MovingState movingState);
   void viewScaleChanged();
   void worldDataChanged(bool dynamicOnly);
+protected:
+ // void tryAttach(StepCore::Item* item, WorldScene* worldScene, const QPointF& pos, int num);
   void mouseSetPos(QPointF pos, QPointF diff, MovingState state);
   int _num;
   
 };
-*/
+
 class PulleyCordGraphicsItem : public WorldGraphicsItem
 {
 public:
@@ -35,22 +37,21 @@ public:
   
   QPainterPath shape() const;
   void paint(QPainter *painter, const QStyleOptionGraphicsItem* option, QWidget* widget);
-  StepCore::PulleyCord* pulleyCord() const {
-    return static_cast<StepCore::PulleyCord*>(_item); }
   void mouseSetPos(const QPointF& pos, const QPointF& diff, MovingState);
   void viewScaleChanged();
   void stateChanged();
   void worldDataChanged(bool dynamicOnly);
   
 protected:
-  
+  StepCore::PulleyCord* pulleyCord() const {
+    return static_cast<StepCore::PulleyCord*>(_item); }  
   QPainterPath _painterPath;
   double _rnorm;
   double _rscale;
   double _radius;
   
-  //PulleyCordHandlerGraphicsItem* _handler1;
-  //PulleyCordHandlerGraphicsItem* _handler2;
+  PulleyCordHandlerGraphicsItem* _handler1;
+  PulleyCordHandlerGraphicsItem* _handler2;
   friend class PulleyCordCreator;
 };
 
