@@ -31,6 +31,7 @@
 #include "itempalette.h"
 #include "settings.h"
 #include "unitscalc.h"
+#include "frictionforce.h"
 
 #include <stepcore/solver.h>
 #include <stepcore/collisionsolver.h>
@@ -201,6 +202,10 @@ void MainWindow::setupActions()
     actionDelete->setShortcut(KShortcut(Qt::Key_Delete));
     actionDelete->setEnabled(false);
 
+    frictionAct = actionCollection()->add<KAction>("friction_act", this, SLOT(showFrictionDialog()));
+    frictionAct->setText(i18n("&Friction"));
+    frictionAct->setEnabled(true);
+    
     /* Simulation menu */
     // The run speed action group
     QActionGroup* runSpeedGroup = new QActionGroup(this);
@@ -267,6 +272,12 @@ void MainWindow::setupActions()
     actionCollection()->addAction("toggle_properties_dock", propertiesBrowser->toggleViewAction());
     actionCollection()->addAction("toggle_info_dock", infoBrowser->toggleViewAction());
     actionCollection()->addAction("toggle_undo_dock", undoBrowser->toggleViewAction());
+}
+
+void MainWindow::showFrictionDialog()
+{
+ _newHandler = new FrictionForceMenuHandler(worldModel);
+  _newHandler->arrangeWidgets();
 }
 
 void MainWindow::updateCaption()

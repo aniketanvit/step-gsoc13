@@ -20,7 +20,7 @@
 #include "rigidbody.h"
 #include "particle.h"
 #include "world.h"
-
+#include <QPair>
 #include <algorithm>
 #include <QtGlobal>
 
@@ -961,26 +961,7 @@ void GJKCollisionSolver::getContactsInfo(ConstraintsInfo& info, bool collisions)
                         info.jacobianDerivative.coeffRef(i, contact.body1->variablesOffset() + RigidBody::AngleOffset) = -rd;
                 }
                 info.forceMin[i] = 0;
-		/*
-		 * apply friction force on the bodies in contact here..
-		 * first find if there is any slipping between the points in contact
-		 * if there is then calculate the normal force between them
-		 * then apply  "\mu" times the normal force on bodies.
-		 *//*
-		double mu;
-		// find if there is slipping between the bodies in contact
-		
-		if(contact.slipping !=0){
-		  
-		  RigidBody* firstBody = static_cast<RigidBody*>(contact.body0);
-		  firstBody->applyForce(Vector2d(2,2), contact.points[p]);
-		  RigidBody* secondBody = static_cast<RigidBody*>(contact.body1);
-		  secondBody->applyForce(Vector2d(-2,-2), contact.points[p]);
-		  if(contact->slipping == 1) {
-		    // find whether to apply static friction or dynamic friction
-		    firstBody->force().dot()
-		  }
-		}*/
+	
             }
             
         } else if(collisions && contact.state == Contact::Colliding) {
@@ -1002,32 +983,17 @@ void GJKCollisionSolver::getContactsInfo(ConstraintsInfo& info, bool collisions)
 					
 		/**
 		 * This is where the coefficient of restitution (or bounceness) will be fed.
-		 * Since the outermost loop is looping through contacts present in the 
-		 * contactValueList, we shall check the bodies present in the contact (i.e.
-		 * contact->body0, contact->body1)
-		 * Then we shall try to find the bounceness-coefficient for that pair of bodies from the 
-		 * FrictionForce::_frictionHash.
-		 * If there is a match then the retrieved values will be applied otherwise 
-		 * elastic-collision will be assumed i.e the user hasn't set any coefficients for that 
-		 * pair of bodies
-		 */
-		double b,f;/*
-		QPair<Body*, Body*> pair1 = qMakePair(contact.body0, contact.body1);
-		if(FrictionForce::_frictionHash.contains(pair1)) {
-		  QPair<double, double> pair2 = FrictionForce::_frictionHash.value(pair1);
-		 b = pair2.second;
-		}
-		else {*/
-		  b = 0.7;// }
+	         */
+               
 		  
                 info.jacobianDerivative.coeffRef(i, contact.body0->variablesOffset() +
-                                        RigidBody::PositionOffset) = ( -(1+b)*contact.normal[0]);
+		RigidBody::PositionOffset) = ( -(1+contact._restitutionCoefficient)*contact.normal[0]);
                 info.jacobianDerivative.coeffRef(i, contact.body0->variablesOffset() +
-                                        RigidBody::PositionOffset+1) = ( -(1+b)*contact.normal[1]);
+		RigidBody::PositionOffset+1) = ( -(1+contact._restitutionCoefficient)*contact.normal[1]);
                 info.jacobianDerivative.coeffRef(i, contact.body1->variablesOffset() +
-                                        RigidBody::PositionOffset) = ( (1+b)*contact.normal[0]);
+		RigidBody::PositionOffset) = ( (1+contact._restitutionCoefficient)*contact.normal[0]);
                 info.jacobianDerivative.coeffRef(i, contact.body1->variablesOffset() +
-                                        RigidBody::PositionOffset+1) = ( (1+b)*contact.normal[1]);
+		RigidBody::PositionOffset+1) = ( (1+contact._restitutionCoefficient)*contact.normal[1]);
                 
                 if(contact.body0->metaObject()->inherits<RigidBody>()) {
                     Vector2d r = static_cast<RigidBody*>(contact.body0)->position() - contact.points[p];
@@ -1035,7 +1001,7 @@ void GJKCollisionSolver::getContactsInfo(ConstraintsInfo& info, bool collisions)
                     info.jacobian.coeffRef(i, contact.body0->variablesOffset() +
                                                 RigidBody::AngleOffset) = ( +rn);
                     info.jacobianDerivative.coeffRef(i, contact.body0->variablesOffset() +
-                                                RigidBody::AngleOffset) = ( +(1+b)*rn);
+		    RigidBody::AngleOffset) = ( +(1+contact._restitutionCoefficient)*rn);
                 }
 
                 if(contact.body1->metaObject()->inherits<RigidBody>()) {
@@ -1044,7 +1010,7 @@ void GJKCollisionSolver::getContactsInfo(ConstraintsInfo& info, bool collisions)
                     info.jacobian.coeffRef(i, contact.body1->variablesOffset() +
                                                 RigidBody::AngleOffset) = ( -rn);
                     info.jacobianDerivative.coeffRef(i, contact.body1->variablesOffset() +
-                                                RigidBody::AngleOffset) = ( -(1+b)*rn);
+		    RigidBody::AngleOffset) = ( -(1+contact._restitutionCoefficient)*rn);
                 }
 
                 info.forceMin[i] = 0;
@@ -1360,7 +1326,10 @@ void GJKCollisionSolver::addContact(Body* body0, Body* body1)
         contact.type = type;
         contact.body0 = body0;
         contact.body1 = body1;
-        contact.state = Contact::Unknown;
+	QPair<int, int> p = qMakePair(body0->variablesOffset(), body1->variablesOffset());
+	contact._frictionCoefficient = fhash.value(p).first;
+	contact._restitutionCoefficient = fhash.value(p).second;
+	contact.state = Contact::Unknown;
         _contacts.push_back(contact);
     }
 }

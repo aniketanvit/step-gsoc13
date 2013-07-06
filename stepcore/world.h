@@ -482,16 +482,6 @@ public:
      *  current (or any subsequent) doEvolve operation will be aborted as soon as possible. */
     void setEvolveAbort(bool evolveAbort = true) { _evolveAbort = evolveAbort; }
     
-  QHash< QPair<Body*, Body*>, QPair<double, double> > _frictionHash;
-	
-    Body* _body1;
-    Body* _body2;
-    
-    double _frCoeff;
-    double _rrCoeff;
-    
-    void fillFrictionHash();
-
 private:
     friend class ItemGroup;
 

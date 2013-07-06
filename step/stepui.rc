@@ -27,6 +27,7 @@
     </Menu>
     <Menu name="edit" >
       <Action name="edit_delete" />
+      <Action name="friction_act" />
     </Menu>
     <Menu name="simulation" >
       <text>&amp;Simulation</text>

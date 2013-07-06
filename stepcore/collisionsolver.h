@@ -27,7 +27,8 @@
 #include "world.h"
 #include "vector.h"
 #include "solver.h"
-
+#include <QHash>
+#include <QPair>
 #include <Eigen/StdVector>
 
 namespace StepCore
@@ -42,9 +43,7 @@ class Body;
 	    
 struct Contact {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-   // provide a constructor to initialise the values of the coefficients to zero
-      Contact(): _restitutionCoefficient(0.6),  _frictionCoefficient(0.9){}
-      ~Contact(){}
+   // provide a constructor to initialise the values of the coefficients to zer
     
     enum {
         Unknown = 0,    /**< Contact state was not (can not) be determined
@@ -83,13 +82,15 @@ struct Contact {
     double   vrel[2];       /**< Relative velocities at contact points */
 
     // section for friction and restitution
-    double    _restitutionCoefficient;
-    double    _frictionCoefficient;
+    mutable double    _restitutionCoefficient;
+    mutable double    _frictionCoefficient;
     int       slipState[2];                          // 1 means body1 slipping along +x on body0
     double normalForce;                                // magnitude of the normal force between the contacted bodies
     // Cached values from previous run
     // TODO: move it to GJK-specific derived struct
     int _w1[2];
+    void setf(const double f) { _frictionCoefficient = f; }
+    void setr(const double r) { _restitutionCoefficient = r; }
 };
 
 typedef std::vector<Contact, Eigen::aligned_allocator<Contact> > ContactValueList;
@@ -145,6 +146,8 @@ public:
     virtual void bodyAdded(BodyList&, Body*) {}
     virtual void bodyRemoved(BodyList&, Body*) {}
 
+        QHash < QPair<int, int>, QPair<double, double> > fhash ;
+	
 public:
     enum {
         InternalError = Solver::CollisionError

@@ -15,6 +15,7 @@ set(step_SRCS
     polygongraphics.cc
     gasgraphics.cc
     softbodygraphics.cc
+    frictionforce.cc
     springgraphics.cc
     motorgraphics.cc
     jointgraphics.cc
@@ -29,6 +30,7 @@ set(step_SRCS
 set(step_UIS
     create_gas_particles.ui
     create_softbody_items.ui
+    create_friction_force.ui
     configure_graph.ui
     configure_meter.ui
     configure_controller.ui

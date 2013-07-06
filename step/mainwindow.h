@@ -38,7 +38,7 @@ class KRecentFilesAction;
 
 class QItemSelection;
 class QActionGroup;
-
+class FrictionForceMenuHandler;
 class MainWindow : public KXmlGuiWindow
 {
     Q_OBJECT
@@ -80,6 +80,7 @@ protected slots:
     void undoTextChanged(const QString& undoText);
     void redoTextChanged(const QString& redoText);
     void worldSelectionChanged();
+    void showFrictionDialog();
 
     /*
 protected slots:
@@ -121,7 +122,8 @@ protected:
     KRecentFilesAction* actionRecentFiles;
 
     KUrl currentFileUrl;
-
+    
+    KAction* frictionAct;
     //The following members are needed for the setting of the timeScale
     int runSpeed;
     KToolBarPopupAction *runSpeedAction;
@@ -131,7 +133,7 @@ protected:
     KAction *slowestSpeedAct;
     KAction *stepSpeedAct;
     QActionGroup *runSpeedGroup;
-
+    FrictionForceMenuHandler* _newHandler;
 };
 
 #endif
