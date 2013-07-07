@@ -1376,8 +1376,13 @@ void GJKCollisionSolver::addContact(Body* body0, Body* body1)
         contact.body0 = body0;
         contact.body1 = body1;
 	QPair<int, int> p = qMakePair(body0->variablesOffset(), body1->variablesOffset());
+	if(fhash.contains(p)) {
 	contact._frictionCoefficient = fhash.value(p).first;
 	contact._restitutionCoefficient = fhash.value(p).second;
+	}else {
+	  contact._frictionCoefficient = 0;
+	  contact._restitutionCoefficient = 1;
+	}
 	contact.state = Contact::Unknown;
         _contacts.push_back(contact);
     }
