@@ -16,7 +16,7 @@ class PulleyCord : public Item, public Joint
   STEPCORE_OBJECT(PulleyCord)
   
 public:
-   explicit PulleyCord(Vector2d position=Vector2d::Zero(), double radius=1, double angle = 0);
+   explicit PulleyCord(Vector2d position=Vector2d::Zero(), double radius=1);
   
   int constraintsCount();
   void getConstraintsInfo(ConstraintsInfo* info, int offset);
@@ -61,8 +61,7 @@ public:
 protected:
   
   Vector2d _position;
-  double _radius;
-  double _angle; // so that the pulley-system can be fixed at an angle  
+  double _radius; 
     
   double _lengthOfCord;
   
@@ -80,8 +79,8 @@ protected:
   RigidBody* _r1;
   RigidBody* _r2;
   
-  Vector2d end1;
-  Vector2d end2;
+  Vector2d end1;         // the point on the pulley where the left end of cord meets it. i.e. tangent from the cord to the pulley
+  Vector2d end2;       // the point on the pulley where the left end of cord meets it. i.e. tangent from the cord to the pulley
 };
 
 }

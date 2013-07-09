@@ -37,7 +37,6 @@ public:
   
   QPainterPath shape() const;
   void paint(QPainter *painter, const QStyleOptionGraphicsItem* option, QWidget* widget);
-  void mouseSetPos(const QPointF& pos, const QPointF& diff, MovingState);
   void viewScaleChanged();
   void stateChanged();
   void worldDataChanged(bool dynamicOnly);

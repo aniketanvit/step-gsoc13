@@ -25,8 +25,8 @@ namespace StepCore {
      STEPCORE_PROPERTY_R_D(StepCore::Vector2d, position2, QT_TRANSLATE_NOOP("PropertyName", "position2"), QT_TRANSLATE_NOOP("Units", "m"), QT_TR_NOOP("Position2"), position2)
      )  
  
-PulleyCord::PulleyCord(Vector2d position, double radius, double angle) :
-                     _position(position), _radius(radius), _angle(angle), _lengthOfCord(0),
+PulleyCord::PulleyCord(Vector2d position, double radius) :
+                     _position(position), _radius(radius), _lengthOfCord(0),
                      _tension(0), _inTension(false), _localPosition1(Vector2d::Zero()), _localPosition2(Vector2d::Zero()),
                      _body1(0), _body2(0), _p1(0), _p2(0), _r1(0), _r2(0)
 {
@@ -100,59 +100,14 @@ int PulleyCord::constraintsCount()
 
 void PulleyCord::getConstraintsInfo(ConstraintsInfo* info, int offset)
 {
-  if(!body || !body2) return;
-  
-  Vector2d p1 = position2() - end2;
-  Vector2d p2 = position1() - end1;
-  
-  p1 = p1/p1.norm();
-  p1 = p2/p2.norm();
-  
-  Vector2d v1 = velocity1().dot(p1);
-  Vector2d v2 = velocity2().dot(p2);
-  
-  info->value[offset  ] = p[0];
-  info->value[offset+1] = p[1];
-  
-  info->derivative[offset  ] = v[0];
-  info->derivative[offset+1] = v[1];
-  
-  if(_p1) {
-    info->jacobian.coeffRef(offset  , _p1->variablesOffset() + Particle::PositionOffset)   = -1;
-    info->jacobian.coeffRef(offset+1, _p1->variablesOffset() + Particle::PositionOffset+1) = -1;
-    
-  } else if(_r1) {
-    Vector2d r1 = _r1->vectorLocalToWorld(_localPosition1);
-    double   av = _r1->angularVelocity();
-    
-    info->jacobian.coeffRef(offset  , _r1->variablesOffset() + Particle::PositionOffset) =(   -1);
-    info->jacobian.coeffRef(offset+1, _r1->variablesOffset() + Particle::PositionOffset+1) =( -1);
-    
-    info->jacobian.coeffRef(offset  , _r1->variablesOffset()+RigidBody::AngleOffset) =( +r1[1]);
-    info->jacobian.coeffRef(offset+1, _r1->variablesOffset()+RigidBody::AngleOffset) =( -r1[0]);
-    info->jacobianDerivative.coeffRef(offset  , _r1->variablesOffset()+RigidBody::AngleOffset) =( +av*r1[0]);
-    info->jacobianDerivative.coeffRef(offset+1, _r1->variablesOffset()+RigidBody::AngleOffset) =( +av*r1[1]);
-  }
-  
-          if(_p2) {
-	    info->jacobian.coeffRef(offset  , _p2->variablesOffset() + Particle::PositionOffset) =(   1);
-	    info->jacobian.coeffRef(offset+1, _p2->variablesOffset() + Particle::PositionOffset+1) =( 1);
-	    
-	  } else if(_r2) {
-	    Vector2d r2 = _r2->vectorLocalToWorld(_localPosition2);
-	    double   av = _r2->angularVelocity();
-	    
-	    info->jacobian.coeffRef(offset  , _r2->variablesOffset() + Particle::PositionOffset) =(   1);
-	    info->jacobian.coeffRef(offset+1, _r2->variablesOffset() + Particle::PositionOffset+1) =( 1);
-	    
-	    info->jacobian.coeffRef(offset  , _r2->variablesOffset()+RigidBody::AngleOffset) =( -r2[1]);
-	    info->jacobian.coeffRef(offset+1, _r2->variablesOffset()+RigidBody::AngleOffset) =( +r2[0]);
-	    info->jacobianDerivative.coeffRef(offset  , _r2->variablesOffset()+RigidBody::AngleOffset) =( -av*r2[0]);
-	    info->jacobianDerivative.coeffRef(offset+1, _r2->variablesOffset()+RigidBody::AngleOffset) =( -av*r2[1]);
-	  }
+  /*
+   * 
+   * problem ...
+   * how to fill the values in the info->value, info->derivative, info->jacobian, info->jacobianDerivative
+   * matrices
+   * 
+   */
 }
-  
-  
 
 Vector2d PulleyCord::velocity1() const
 {
