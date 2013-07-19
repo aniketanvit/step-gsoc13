@@ -80,18 +80,19 @@ void PulleyCordHandlerGraphicsItem::viewScaleChanged()
 void PulleyCordHandlerGraphicsItem::worldDataChanged(bool)
 {
  if(_num == 1){
-    setPos(vectorToPoint(static_cast<StepCore::PulleyCord*>(_item)->position1()));
+    setPos(vectorToPoint(static_cast<StepCore::PulleyCord*>(_item)->position1() - static_cast<StepCore::PulleyCord*>(_item)->position()));
  }else if(_num == 2) {
-    setPos(vectorToPoint(static_cast<StepCore::PulleyCord*>(_item)->position2()));
+    setPos(vectorToPoint(static_cast<StepCore::PulleyCord*>(_item)->position2() - static_cast<StepCore::PulleyCord*>(_item)->position()));
  }
                         
 }
 
-void PulleyCordHandlerGraphicsItem::mouseSetPos(const QPointF& pos, const QPointF& diff, MovingState movingState)
+void PulleyCordHandlerGraphicsItem::mouseSetPos(const QPointF& pos, const QPointF&, MovingState movingState)
 {
   static_cast<WorldScene*>(scene())->snapItem(parentItem()->mapToParent(pos),
-			   WorldScene::SnapParticle | WorldScene::SnapRigidBody |
-			   WorldScene::SnapSetLocalPosition, 0, movingState, _item, _num);
+                                     WorldScene::SnapParticle | WorldScene::SnapRigidBody |
+				     WorldScene::SnapSetLocalPosition | WorldScene::SnapSetPosition,
+				     0, movingState, _item, _num);
   
 }
 
@@ -99,13 +100,13 @@ PulleyCordGraphicsItem::PulleyCordGraphicsItem(StepCore::Item* item, WorldModel*
                            : WorldGraphicsItem(item, worldModel)
 {
   Q_ASSERT(dynamic_cast<StepCore::PulleyCord*>(_item) != NULL);
-  setFlag(QGraphicsItem::ItemIsSelectable);
   setFlag(QGraphicsItem::ItemIsMovable);
   setZValue(JOINT_ZVALUE);
   _handler1 = new PulleyCordHandlerGraphicsItem(item, worldModel, this, 1);
   _handler2 = new PulleyCordHandlerGraphicsItem(item, worldModel, this, 2);
   _handler1->setVisible(true);
   _handler2->setVisible(true);
+  
 }
 
 QPainterPath PulleyCordGraphicsItem::shape() const
@@ -115,17 +116,15 @@ QPainterPath PulleyCordGraphicsItem::shape() const
 
 void PulleyCordGraphicsItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
 {
-  painter->setPen(QPen(Qt::blue));
+  painter->setPen(QPen(Qt::magenta));
   QColor color(Qt::blue);
   painter->setBrush(QBrush(color));
-  double s = currentViewScale();
-  double radius = pulleyCord()->radius();
-  painter->drawEllipse(QRectF(-radius, -radius, 2*radius, 2*radius));
+  painter->drawPath(_painterPath);
   
-   if(isSelected()) {
+  if(isSelected()) {
       painter->setRenderHint(QPainter::Antialiasing, true);
       painter->setPen(QPen(SELECTION_COLOR, 0, Qt::DashLine));
-      double m = SELECTION_MARGIN / currentViewScale();
+      painter->setBrush(Qt::NoBrush);
       painter->drawRect(_boundingRect);
     }
 }
@@ -157,16 +156,57 @@ void PulleyCordGraphicsItem::viewScaleChanged()
   prepareGeometryChange();
   _painterPath = QPainterPath();
   _painterPath.setFillRule(Qt::WindingFill);
-  
+  QPointF p = vectorToPoint(pulleyCord()->position());
+  double rad = pulleyCord()->radius();
+  QPointF p1(-rad, 0);
+  QPointF p2(rad, 0);
   double s = currentViewScale();
-  double radius = pulleyCord()->radius()/s;
-  //QPointF pos = WorldGraphicsItem::vectorToPoint(pulleyCord()->position());
+  double radius = pulleyCord()->radius();
   _painterPath.addEllipse(QRectF(-radius, -radius, 2*radius, 2*radius));
-  _boundingRect = QRectF(-radius, -radius, 2*radius, 2*radius).normalized();
+  _painterPath.moveTo(p1);
+  _painterPath.lineTo(vectorToPoint(pulleyCord()->position1()-pulleyCord()->position()));
+  _painterPath.moveTo(p2);
+  _painterPath.lineTo(vectorToPoint(pulleyCord()->position2()-pulleyCord()->position()));
+  _boundingRect = _painterPath.boundingRect();
+  _boundingRect.adjust(-1/2,-1/2,1/2,1/2);
 }
 
 
-
+void PulleyCordGraphicsItem::mouseSetPos(const QPointF& /*pos*/, const QPointF& diff, MovingState)
+{
+  _worldModel->simulationPause();
+  
+  if(pulleyCord()->body1()) {
+    Q_ASSERT(pulleyCord->body1()->metaObject()->inherits<StepCore::Item>());
+    WorldGraphicsItem* gItem = static_cast<WorldScene*>(
+      scene())->graphicsFromItem(static_cast<StepCore::Item*>(pulleyCord()->body1()));
+      Q_ASSERT(gItem != NULL);
+      if(!gItem->isSelected()) {
+	_worldModel->setProperty(_item, "localPosition1",
+				 _item->metaObject()->property("position1")->readVariant(_item));
+				             _worldModel->setProperty(_item, "body1",
+								      QVariant::fromValue<StepCore::Object*>(NULL), WorldModel::UndoNoMerge);
+      }
+  } else {
+    _worldModel->setProperty(_item, "localPosition1", 
+			     QVariant::fromValue( (pulleyCord()->position1() + pointToVector(diff)).eval() ));
+  }
+  
+      if(pulleyCord()->body2()) {
+	Q_ASSERT(pulleyCord()->body2()->metaObject()->inherits<StepCore::Item>());
+	WorldGraphicsItem* gItem = static_cast<WorldScene*>(
+	  scene())->graphicsFromItem(static_cast<StepCore::Item*>(pulleyCord()->body2()));
+	  Q_ASSERT(gItem != NULL);
+	  if(!gItem->isSelected()) {
+	    _worldModel->setProperty(_item, "localPosition2",
+				     _item->metaObject()->property("position2")->readVariant(_item));
+				                 _worldModel->setProperty(_item, "body2", QString(), WorldModel::UndoNoMerge);
+	  }
+      } else {
+	_worldModel->setProperty(_item, "localPosition2",
+				 QVariant::fromValue( (pulleyCord()->position2() + pointToVector(diff)).eval() ));
+      }
+}
 
 
 

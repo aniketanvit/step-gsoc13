@@ -25,15 +25,15 @@ namespace StepCore {
      STEPCORE_PROPERTY_R_D(StepCore::Vector2d, position2, QT_TRANSLATE_NOOP("PropertyName", "position2"), QT_TRANSLATE_NOOP("Units", "m"), QT_TR_NOOP("Position2"), position2)
      )  
  
-PulleyCord::PulleyCord(Vector2d position, double radius) :
-                     _position(position), _radius(radius), _lengthOfCord(0),
-                     _tension(0), _inTension(false), _localPosition1(Vector2d::Zero()), _localPosition2(Vector2d::Zero()),
-                     _body1(0), _body2(0), _p1(0), _p2(0), _r1(0), _r2(0)
+PulleyCord::PulleyCord(Vector2d position, double radius, Item* body1, Item* body2) :
+                     _position(position), _radius(radius), _body1(body1), _body2(body2), _lengthOfCord(0),
+                     _tension(0), _inTension(false), _localPosition1(0,0), _localPosition2(0,0),
+                     _p1(0), _p2(0), _r1(0), _r2(0)
 {
   double x1 = _radius;
   double y1 = Vector2d(_position-position1()).squaredNorm() - pow(_radius, 2);
   y1 = sqrt(y1);
-  double angle1 = atan2(y1, x1);
+  double angle1 = atan2(x1, y1);
   double x2 = _radius;
   double y2 = Vector2d(_position-position2()).squaredNorm() - pow(_radius, 2);
   y2 = sqrt(y2);
