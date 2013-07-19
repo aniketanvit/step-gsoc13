@@ -90,10 +90,20 @@ void PulleyCordHandlerGraphicsItem::worldDataChanged(bool)
 void PulleyCordHandlerGraphicsItem::mouseSetPos(const QPointF& pos, const QPointF&, MovingState movingState)
 {
   static_cast<WorldScene*>(scene())->snapItem(parentItem()->mapToParent(pos),
-                                     WorldScene::SnapParticle | WorldScene::SnapRigidBody |
+                                     WorldScene::SnapRigidBody |
 				     WorldScene::SnapSetLocalPosition | WorldScene::SnapSetPosition,
 				     0, movingState, _item, _num);
-  
+  /*
+  QGraphicsItem* ggItem = static_cast<WorldScene*>(scene())->itemAt(pos);
+  WorldGraphicsItem* gItem = static_cast<WorldGraphicsItem*>(ggItem);
+  StepCore::Item* ii = static_cast<WorldScene*>(scene())->itemFromGraphics(gItem);
+  StepCore::Object* i = static_cast<StepCore::Object*>(ii);
+  if(_num == 1){
+  _worldModel->setProperty(_item, "body1", QVariant::fromValue<StepCore::Object*>(i), WorldModel::UndoNoMerge);
+  }else if(_num == 2){
+    _worldModel->setProperty(_item, "body2", QVariant::fromValue<StepCore::Object*>(i), WorldModel::UndoNoMerge);
+  }
+  */
 }
 
 PulleyCordGraphicsItem::PulleyCordGraphicsItem(StepCore::Item* item, WorldModel* worldModel)
@@ -184,8 +194,8 @@ void PulleyCordGraphicsItem::mouseSetPos(const QPointF& /*pos*/, const QPointF& 
       if(!gItem->isSelected()) {
 	_worldModel->setProperty(_item, "localPosition1",
 				 _item->metaObject()->property("position1")->readVariant(_item));
-				             _worldModel->setProperty(_item, "body1",
-								      QVariant::fromValue<StepCore::Object*>(NULL), WorldModel::UndoNoMerge);
+	_worldModel->setProperty(_item, "body1",
+	                         QVariant::fromValue<StepCore::Object*>(NULL), WorldModel::UndoNoMerge);
       }
   } else {
     _worldModel->setProperty(_item, "localPosition1", 
