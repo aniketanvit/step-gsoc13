@@ -21,6 +21,7 @@
 
 #include <KXmlGuiWindow>
 #include <KUrl>
+#include <QDebug>
 
 class WorldModel;
 class WorldBrowser;
@@ -60,7 +61,7 @@ public slots:
     void uploadExample();
     void downloadExamples();
 
-    void configureStep();
+   void configureStep();
 
     void simulationStartStop();
     void simulationStart();
@@ -80,7 +81,8 @@ public slots:
     void undoTextChanged(const QString& undoText);
     void redoTextChanged(const QString& redoText);
     void worldSelectionChanged();
-
+    void testSlot() ;
+    
     /*
 protected slots:
     void on_actionNew_triggered(bool checked);
@@ -118,8 +120,8 @@ protected:
     KAction* actionCopy;
     KAction* actionPaste;
     
-    //KAction* frameChange;
-
+    KAction* testAction;
+    
     KRecentFilesAction* actionRecentFiles;
 
     KUrl currentFileUrl;

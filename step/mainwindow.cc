@@ -172,13 +172,13 @@ void MainWindow::setupActions()
     actionDownloadExamples->setIcon(KIcon("get-hot-new-stuff"));
 
     /* Edit menu */
-    KAction* frameChange = actionCollection()->add<KAction>("change_frame_of_view", this->worldScene, SLOT(toggleFramChange()));
+    testAction = actionCollection()->add<KAction>("test_action", this, SLOT(testSlot()));
+    testAction->setEnabled(true);
+    testAction->setIconText(i18n("Toggle Frame"));
     actionRedo = KStandardAction::redo(worldModel->undoStack(), SLOT(redo()), actionCollection());
     actionUndo = KStandardAction::undo(worldModel->undoStack(), SLOT(undo()), actionCollection());
     actionRedo->setEnabled(false); actionUndo->setEnabled(false);
     actionRedo->setIconText(i18n("Redo")); actionUndo->setIconText(i18n("Undo"));
-    frameChange->setEnabled(true);
-    frameChange->setIconText(i18n("change view"));
     connect(worldModel->undoStack(), SIGNAL(canRedoChanged(bool)), actionRedo, SLOT(setEnabled(bool)));
     connect(worldModel->undoStack(), SIGNAL(canUndoChanged(bool)), actionUndo, SLOT(setEnabled(bool)));
     connect(worldModel->undoStack(), SIGNAL(cleanChanged(bool)), this, SLOT(updateCaption()));
@@ -273,6 +273,15 @@ void MainWindow::setupActions()
     actionCollection()->addAction("toggle_undo_dock", undoBrowser->toggleViewAction());
 }
 
+void MainWindow::testSlot()
+{
+  qDebug()<<"testing...."<<endl; 
+  if(worldScene->doFrameChange == true)
+    worldScene->doFrameChange = false;
+  else
+    worldScene->doFrameChange = true;
+  
+}
 void MainWindow::updateCaption()
 {
     QString shownName;
@@ -292,7 +301,7 @@ bool MainWindow::queryClose()
 }
 
 bool MainWindow::newFile()
-{
+{std::cout<<"new file"<<std::endl;
     if(worldModel->isSimulationActive()) simulationStop();
     if(!maybeSave()) return false;
 

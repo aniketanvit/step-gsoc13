@@ -403,13 +403,13 @@ void WorldScene::worldDataChanged(bool dynamicOnly)
 	  * here
 	  * 
 	  */
-	 //if(doFrameChange){
+	 if(doFrameChange){
 	 QModelIndex selectedItem = _worldModel->selectionModel()->currentIndex();
 	 WorldGraphicsItem* frameItem = graphicsFromItem(_worldModel->item(selectedItem));
 	 //QGraphicsItem* g = static_cast<QGraphicsItem*>(centerItem);
 	 if(frameItem)
              _worldView->centerOn(frameItem->x(), frameItem->y());
-	// }
+	 }
 	 
     QRectF boundingRect = itemsBoundingRect();
     setSceneRect(boundingRect.united(QRectF(-20, -20, 40, 40)));
@@ -581,14 +581,6 @@ void WorldScene::snapUpdateToolTip()
 bool WorldScene::hasItemCreator() const
 {
     return _itemCreator && !_itemCreator->finished();
-}
-
-void WorldScene::toggleFrameChange()
-{
-  if(doFrameChange == true)
-    doFrameChange = false;
-  else
-    doFrameChange = true;
 }
 
 WorldGraphicsView::WorldGraphicsView(WorldScene* worldScene, QWidget* parent)
