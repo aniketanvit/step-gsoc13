@@ -118,6 +118,7 @@ protected:
     KAction* actionCopy;
     KAction* actionPaste;
 
+    KAction* backSimulateAction;
     KRecentFilesAction* actionRecentFiles;
 
     KUrl currentFileUrl;

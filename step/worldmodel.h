@@ -218,6 +218,7 @@ public slots:
     void pasteItems();
     void deleteSelectedItems(); ///< Delete all selected items
 
+    void reverse();
 protected slots:
     void simulationFrameBegin();
     void simulationFrameEnd(int result);

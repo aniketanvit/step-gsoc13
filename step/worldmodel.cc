@@ -357,6 +357,11 @@ WorldModel::~WorldModel()
     delete _world;
 }
 
+void WorldModel::reverse()
+{
+  world()->toggleSimulation();
+}
+
 void WorldModel::resetWorld()
 {
     Q_ASSERT(!isSimulationActive());

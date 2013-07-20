@@ -401,6 +401,7 @@ public:
     World& operator=(const World& world);
 
 
+    void toggleSimulation() { if (_backwardSimulation) _backwardSimulation = false; else _backwardSimulation = true; std::cout<<"d";}
     /** Clear world (removes all items, solver and resets time) */
     void clear();
 
@@ -558,6 +559,7 @@ private:
     bool    _stopOnCollision;
     bool    _stopOnIntersection;
     bool    _evolveAbort;
+    bool _backwardSimulation;
 };
 
 } // namespace StepCore

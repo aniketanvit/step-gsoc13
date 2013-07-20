@@ -200,7 +200,9 @@ void MainWindow::setupActions()
     actionDelete->setIcon(KIcon("edit-delete"));
     actionDelete->setShortcut(KShortcut(Qt::Key_Delete));
     actionDelete->setEnabled(false);
-
+    backSimulateAction = actionCollection()->add<KAction>("backward_simulation", worldModel, SLOT(reverse()));
+    backSimulateAction->setEnabled(true);
+    backSimulateAction->setText(i18n("&Back-Simulate"));
     /* Simulation menu */
     // The run speed action group
     QActionGroup* runSpeedGroup = new QActionGroup(this);
@@ -209,6 +211,7 @@ void MainWindow::setupActions()
     runSpeedAction = new KToolBarPopupAction(KIcon("media-playback-start"), i18n("&Run"), this);
     connect(runSpeedAction, SIGNAL(triggered()), 
             this, SLOT(simulationStartStop()));
+    runSpeedAction->setShortcut(KShortcut(Qt::Key_Space));
     QMenu* runSpeedActionMenu = runSpeedAction->menu();
     actionCollection()->addAction("run_speed", runSpeedAction);
     runSpeedActionMenu->setStatusTip(i18n("Execute the program"));
@@ -257,7 +260,7 @@ void MainWindow::setupActions()
     KStandardAction::fitToPage(worldGraphicsView, SLOT(fitToPage()), actionCollection());
     KStandardAction::zoomIn(worldGraphicsView, SLOT(zoomIn()), actionCollection());
     KStandardAction::zoomOut(worldGraphicsView, SLOT(zoomOut()), actionCollection());
-
+    
     /* Settings menu */
     KStandardAction::preferences(this, SLOT(configureStep()), actionCollection());
 
