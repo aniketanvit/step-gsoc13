@@ -20,6 +20,8 @@
 #include "solver.h"
 #include "collisionsolver.h"
 #include "constraintsolver.h"
+#include "rigidbody.h"
+#include "particle.h"
 #include <algorithm>
 #include <cmath>
 #include <QtGlobal>
@@ -685,6 +687,32 @@ void World::gatherJointsInfo(ConstraintsInfo* info)
     }
 }
 
+void World::toggleSimulation()
+{
+  if (_backwardSimulation)
+    _backwardSimulation = false;
+  else _backwardSimulation = true;
+  
+  const BodyList::const_iterator b_end = _bodies.end();
+  for(BodyList::iterator body = _bodies.begin(); body != b_end; ++body) {
+    if((*body)->metaObject()->inherits<Particle>()){
+      Particle* _p = static_cast<Particle*>((*body));
+      Vector2d prevv = _p->velocity();
+      _p->setVelocity(-prevv);
+    }
+    else if((*body)->metaObject()->inherits<RigidBody>()) {
+      RigidBody* _r = static_cast<RigidBody*>((*body));
+      Vector2d prevv = _r->velocity();
+      double preva = _r->angularVelocity();
+      _r->setVelocity(-prevv);
+      _r->setAngularVelocity(-preva);
+    }
+  }
+
+   std::cout<<"Toggle Simulation ";
+
+  
+}
 int World::doCalcFn()
 {
     STEPCORE_ASSERT_NOABORT(_solver != NULL);
@@ -743,13 +771,13 @@ if(_backwardSimulation) {
 	      // abuse our settings so we have to step manually
 	      //STEPCORE_ASSERT_NOABORT(_collisionTime <= targetTime);
 	      //STEPCORE_ASSERT_NOABORT(_collisionTime > _time);
-	      double stepSize = fmin(_solver->stepSize() / 2, targetTime - _time);
-	      double collisionEndTime = targetTime - _time > stepSize*3.01 ? _time + stepSize*3 : targetTime;
+	      double stepSize = fmin(_solver->stepSize() / 2, _time - targetTime);
+	      double collisionEndTime = _time - targetTime > stepSize*3.01 ? _time + stepSize*3 : targetTime;
 	      
 	      _stopOnCollision = false;
 	      
 	      do {
-		double endTime = collisionEndTime - time > stepSize*1.01 ? time+stepSize : collisionEndTime;
+		double endTime = collisionEndTime - time > stepSize*1.01 ? time-stepSize : collisionEndTime;
 		
 		ret = _solver->doEvolve(&time, endTime, &_variables,
 					_errorsCalculation ? &_variances : NULL);
@@ -760,7 +788,7 @@ if(_backwardSimulation) {
 		  //STEPCORE_ASSERT_NOABORT(_collisionTime > _time);
 		  //STEPCORE_ASSERT_NOABORT(_collisionTime < _collisionExpectedTime);
 		  stepSize = fmin(stepSize/2, targetTime - _time);
-		  collisionEndTime = targetTime - _time > stepSize*3.01 ? _time + stepSize*3 : targetTime;
+		  collisionEndTime = _time - targetTime > stepSize*3.01 ? _time - stepSize*3 : targetTime;
 		  
 		  //STEPCORE_ASSERT_NOABORT(_time + stepSize != _time);
 		  // XXX: what to do if stepSize becomes too small ?
@@ -807,7 +835,7 @@ if(_backwardSimulation) {
 												  }
 		} else goto out;
 		
-	      } while(_time + stepSize/100 <= collisionEndTime); // XXX
+	      } while(_time - stepSize/100 <= collisionEndTime); // XXX
 	      } else if(ret != Solver::OK) goto out;
   }
   

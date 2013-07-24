@@ -253,7 +253,7 @@ int GenericEulerSolver::doReverseEvolve(double* t, double t1, VectorXd* y, Vecto
     
     //double t11 = _stepSize < t1-*t ? *t + _stepSize : t1;
     double t11 = *t-t1 > _stepSize*1.01 ? *t - _stepSize : t1;
-    result = doReverseStep(*t, t11 - *t, y, yvar);
+    result = doStep(*t,*t - t11, y, yvar);
     
     if(result != OK && result != ToleranceError) return result;
     

@@ -401,7 +401,7 @@ public:
     World& operator=(const World& world);
 
 
-    void toggleSimulation() { if (_backwardSimulation) _backwardSimulation = false; else _backwardSimulation = true; std::cout<<"d";}
+    void toggleSimulation();
     /** Clear world (removes all items, solver and resets time) */
     void clear();
 
