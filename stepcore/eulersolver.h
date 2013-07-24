@@ -64,7 +64,6 @@ public:
 
 protected:
     int doStep(double t, double stepSize, VectorXd* y, VectorXd* yvar);
-    int doReverseStep(double t, double stepSize, VectorXd* y, VectorXd* yvar);
     void init();
     void fini();
 
