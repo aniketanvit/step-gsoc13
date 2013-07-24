@@ -772,7 +772,7 @@ if(_backwardSimulation) {
 	      //STEPCORE_ASSERT_NOABORT(_collisionTime <= targetTime);
 	      //STEPCORE_ASSERT_NOABORT(_collisionTime > _time);
 	      double stepSize = fmin(_solver->stepSize() / 2, _time - targetTime);
-	      double collisionEndTime = _time - targetTime > stepSize*3.01 ? _time + stepSize*3 : targetTime;
+	      double collisionEndTime = _time - targetTime > stepSize*3.01 ? _time - stepSize*3 : targetTime;
 	      
 	      _stopOnCollision = false;
 	      
@@ -835,7 +835,7 @@ if(_backwardSimulation) {
 												  }
 		} else goto out;
 		
-	      } while(_time - stepSize/100 <= collisionEndTime); // XXX
+	      } while(_time - stepSize/100 >= collisionEndTime); // XXX
 	      } else if(ret != Solver::OK) goto out;
   }
   
