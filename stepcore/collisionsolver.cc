@@ -925,8 +925,104 @@ void GJKCollisionSolver::getContactsInfo(ConstraintsInfo& info, bool collisions)
                 info.jacobian.coeffRef(i, contact.body0->variablesOffset() + RigidBody::PositionOffset+1) = -contact.normal[1];
                 info.jacobian.coeffRef(i, contact.body1->variablesOffset() + RigidBody::PositionOffset)   = contact.normal[0];
                 info.jacobian.coeffRef(i, contact.body1->variablesOffset() + RigidBody::PositionOffset+1) = contact.normal[1];
-
-                if(!collisions) {
+		
+		
+		if(contact.body0->metaObject()->inherits<RigidBody>()) {
+		  RigidBody* _b0 = static_cast<RigidBody*>(contact.body0);
+		  
+		  if(contact.body0->metaObject()->inherits<RigidBody>()) {
+		    RigidBody* _b1 = static_cast<RigidBody*>(contact.body1);
+		    
+		    Vector2d _f0 = _b0->force();
+		    Vector2d _f1 = _b1->force();
+		    
+		    Vector2d _v0 = _b0->velocity();
+		    Vector2d _v1 = _b1->velocity();
+		    
+		    if((_f1 - _f0).dot(contact.tangent) > 0){
+		    info.jacobian.coeffRef(i, contact.body0->variablesOffset() + RigidBody::PositionOffset)
+		    += contact.tangent[0]*contact._frictionCoefficient;
+		    info.jacobian.coeffRef(i, contact.body0->variablesOffset() + RigidBody::PositionOffset+1)
+		    += contact.tangent[1]*contact._frictionCoefficient;
+		    info.jacobian.coeffRef(i, contact.body1->variablesOffset() + RigidBody::PositionOffset)
+		    += -contact.tangent[0]*contact._frictionCoefficient;
+		    info.jacobian.coeffRef(i, contact.body1->variablesOffset() + RigidBody::PositionOffset+1)
+		    += -contact.tangent[1]*contact._frictionCoefficient;
+		  
+		    
+		    info.jacobianDerivative.coeffRef(i, contact.body0->variablesOffset() + RigidBody::PositionOffset)
+		    += contact.tangent[0]*contact._frictionCoefficient;
+		    info.jacobianDerivative.coeffRef(i, contact.body0->variablesOffset() + RigidBody::PositionOffset+1)
+		    += contact.tangent[1]*contact._frictionCoefficient;
+		    info.jacobianDerivative.coeffRef(i, contact.body1->variablesOffset() + RigidBody::PositionOffset)
+		    += -contact.tangent[0]*contact._frictionCoefficient;
+		    info.jacobianDerivative.coeffRef(i, contact.body1->variablesOffset() + RigidBody::PositionOffset+1)
+		    += -contact.tangent[1]*contact._frictionCoefficient;
+		
+		    }
+		    else if((_f1 - _f0).dot(contact.tangent) < 0){
+		      info.jacobian.coeffRef(i, contact.body0->variablesOffset() + RigidBody::PositionOffset)
+		      += -contact.tangent[0]*contact._frictionCoefficient;
+		      info.jacobian.coeffRef(i, contact.body0->variablesOffset() + RigidBody::PositionOffset+1)
+		      += -contact.tangent[1]*contact._frictionCoefficient;
+		      info.jacobian.coeffRef(i, contact.body1->variablesOffset() + RigidBody::PositionOffset)
+		      += contact.tangent[0]*contact._frictionCoefficient;
+		      info.jacobian.coeffRef(i, contact.body1->variablesOffset() + RigidBody::PositionOffset+1)
+		      += contact.tangent[1]*contact._frictionCoefficient;
+		      
+		      
+		      info.jacobianDerivative.coeffRef(i, contact.body0->variablesOffset() + RigidBody::PositionOffset)
+		      += -contact.tangent[0]*contact._frictionCoefficient;
+		      info.jacobianDerivative.coeffRef(i, contact.body0->variablesOffset() + RigidBody::PositionOffset+1)
+		      += -contact.tangent[1]*contact._frictionCoefficient;
+		      info.jacobianDerivative.coeffRef(i, contact.body1->variablesOffset() + RigidBody::PositionOffset)
+		      += contact.tangent[0]*contact._frictionCoefficient;
+		      info.jacobianDerivative.coeffRef(i, contact.body1->variablesOffset() + RigidBody::PositionOffset+1)
+		      += contact.tangent[1]*contact._frictionCoefficient;
+		    }
+		    else if((_v0 - _v1).dot(contact.tangent) > 0) {
+		      info.jacobian.coeffRef(i, contact.body0->variablesOffset() + RigidBody::PositionOffset)
+		      += contact.tangent[0]*contact._frictionCoefficient;
+		      info.jacobian.coeffRef(i, contact.body0->variablesOffset() + RigidBody::PositionOffset+1)
+		      += contact.tangent[1]*contact._frictionCoefficient;
+		      info.jacobian.coeffRef(i, contact.body1->variablesOffset() + RigidBody::PositionOffset)
+		      += -contact.tangent[0]*contact._frictionCoefficient;
+		      info.jacobian.coeffRef(i, contact.body1->variablesOffset() + RigidBody::PositionOffset+1)
+		      += -contact.tangent[1]*contact._frictionCoefficient;
+		      
+		      
+		      info.jacobianDerivative.coeffRef(i, contact.body0->variablesOffset() + RigidBody::PositionOffset)
+		      += contact.tangent[0]*contact._frictionCoefficient;
+		      info.jacobianDerivative.coeffRef(i, contact.body0->variablesOffset() + RigidBody::PositionOffset+1)
+		      += contact.tangent[1]*contact._frictionCoefficient;
+		      info.jacobianDerivative.coeffRef(i, contact.body1->variablesOffset() + RigidBody::PositionOffset)
+		      += -contact.tangent[0]*contact._frictionCoefficient;
+		      info.jacobianDerivative.coeffRef(i, contact.body1->variablesOffset() + RigidBody::PositionOffset+1)
+		      += -contact.tangent[1]*contact._frictionCoefficient;
+		    }
+		    else if((_v0 - _v1).dot(contact.tangent) < 0) {
+		      info.jacobian.coeffRef(i, contact.body0->variablesOffset() + RigidBody::PositionOffset)
+		      += -contact.tangent[0]*contact._frictionCoefficient;
+		      info.jacobian.coeffRef(i, contact.body0->variablesOffset() + RigidBody::PositionOffset+1)
+		      += -contact.tangent[1]*contact._frictionCoefficient;
+		      info.jacobian.coeffRef(i, contact.body1->variablesOffset() + RigidBody::PositionOffset)
+		      += contact.tangent[0]*contact._frictionCoefficient;
+		      info.jacobian.coeffRef(i, contact.body1->variablesOffset() + RigidBody::PositionOffset+1)
+		      += contact.tangent[1]*contact._frictionCoefficient;
+		      
+		      
+		      info.jacobianDerivative.coeffRef(i, contact.body0->variablesOffset() + RigidBody::PositionOffset)
+		      += -contact.tangent[0]*contact._frictionCoefficient;
+		      info.jacobianDerivative.coeffRef(i, contact.body0->variablesOffset() + RigidBody::PositionOffset+1)
+		      += -contact.tangent[1]*contact._frictionCoefficient;
+		      info.jacobianDerivative.coeffRef(i, contact.body1->variablesOffset() + RigidBody::PositionOffset)
+		      += contact.tangent[0]*contact._frictionCoefficient;
+		      info.jacobianDerivative.coeffRef(i, contact.body1->variablesOffset() + RigidBody::PositionOffset+1)
+		      += contact.tangent[1]*contact._frictionCoefficient;
+		    }
+		  }
+		}
+		    if(!collisions) {
                     info.jacobianDerivative.coeffRef(i, contact.body0->variablesOffset() +
                                             RigidBody::PositionOffset) = ( -contact.normalDerivative[0]);
                     info.jacobianDerivative.coeffRef(i, contact.body0->variablesOffset() +
@@ -1013,14 +1109,14 @@ void GJKCollisionSolver::getContactsInfo(ConstraintsInfo& info, bool collisions)
 		    RigidBody::AngleOffset) = ( -(1+contact._restitutionCoefficient)*rn);
                 }
 
-                RigidBody* _b1, *_b2;
-                if(contact.body0->metaObject()->inherits<RigidBody>()) 
-		  _b1 = static_cast<RigidBody*> (contact.body0);
                 
-                if(contact.body0->metaObject()->inherits<RigidBody>()) 
-		  _b2 = static_cast<RigidBody*> (contact.body1);
+                if(contact.body0->metaObject()->inherits<RigidBody>()) {
+		  RigidBody* _b0 = static_cast<RigidBody*> (contact.body0);
                 
-		Vector2d vrelTangent = (_b2->velocityWorld(contact.points[p]) - _b1->velocityWorld(contact.points[p]));
+                if(contact.body0->metaObject()->inherits<RigidBody>()) {
+		  RigidBody* _b1 = static_cast<RigidBody*> (contact.body1);
+                
+		Vector2d vrelTangent = (_b1->velocityWorld(contact.points[p]) - _b0->velocityWorld(contact.points[p]));
 		double vtangent = vrelTangent.dot(contact.tangent);
                 if(vtangent > 0) {
 		  info.jacobian.coeffRef(i, contact.body0->variablesOffset() +
@@ -1061,7 +1157,8 @@ void GJKCollisionSolver::getContactsInfo(ConstraintsInfo& info, bool collisions)
 		  RigidBody::PositionOffset+1) += ( (1+contact._restitutionCoefficient)*contact.tangent[1]*contact._frictionCoefficient);
                 }
                 
-                
+		}
+		}
                 info.forceMin[i] = 0;
                 info.collisionFlag = true;
             }

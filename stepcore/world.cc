@@ -820,197 +820,95 @@ out:
 }
 
 inline int World::solverFunction(double t, const double* y,
-                    const double* yvar, double* f, double* fvar)
+				 const double* yvar, double* f, double* fvar)
 {
-    if(_evolveAbort) return Solver::Aborted;
-
-    _time = t;
-    scatterVariables(y, yvar); // this will reset force
-
-    // 1. Forces
-    bool calcVariances = (fvar != NULL);
-    const ForceList::const_iterator f_end = _forces.end();
-    for(ForceList::iterator force = _forces.begin(); force != f_end; ++force) {
-        (*force)->calcForce(calcVariances);
-    }
-    
-    std::memcpy(f, y+_variablesCount, _variablesCount*sizeof(*f));
-    if(fvar) std::memcpy(fvar, y+_variablesCount, _variablesCount*sizeof(*fvar));
-    gatherAccelerations(f+_variablesCount, fvar ? fvar+_variablesCount : NULL);
-    
-    if (_constraintSolver)
-    {
-      // setup...
+  if(_evolveAbort) return Solver::Aborted;
+  
+  _time = t;
+  scatterVariables(y, yvar); // this will reset force
+  
+  // 1. Forces
+  bool calcVariances = (fvar != NULL);
+  const ForceList::const_iterator f_end = _forces.end();
+  for(ForceList::iterator force = _forces.begin(); force != f_end; ++force) {
+    (*force)->calcForce(calcVariances);
+  }
       
-      // check contacts
-      int state = 0;
-      if(_collisionSolver) {
-          int contactsCount = 0;
-          state = _collisionSolver->checkContacts(_bodies, false, &contactsCount);
-          
-          if (contactsCount!=_constraintsInfo.contactsCount)
-          {
-            _constraintsInfo.setDimension(_constraintsInfo.variablesCount,
-                                          _constraintsInfo.constraintsCount,
-                                          contactsCount);
-          }
-      }
-
-      if(_variablesCount>0)
-      {
-        ::new (&_constraintsInfo.position) MappedVector(y, _variablesCount);
-        ::new (&_constraintsInfo.velocity) MappedVector(y+_variablesCount, _variablesCount);
-        ::new (&_constraintsInfo.acceleration) MappedVector(f+_variablesCount, _variablesCount);
-      }
-
-      // end sparse matrix assembly
-      
-      // 2. Joints
-      gatherJointsInfo(&_constraintsInfo);
-
-      // 3. Collisions (TODO: variances for collisions)
-      if(_collisionSolver) {
-          _collisionSolver->getContactsInfo(_constraintsInfo, false);
-          if(state == Contact::Intersected) {
-              if(_stopOnIntersection) return Solver::IntersectionDetected;
-          } else {
-              if(state == Contact::Colliding) {
-                  if(_stopOnCollision) return Solver::CollisionDetected;
-                  // XXX: We are not stopping on colliding contact
-                  // and resolving them only at the end of timestep
-                  // XXX: is it right solution ? Shouldn't we try to find
-                  // contact point more exactly for example using binary search ?
-                  //_collisionTime = t;
-                  //_collisionTime = t;
-                  //if(t < _collisionExpectedTime)
-                  //    return DantzigLCPCollisionSolver::CollisionDetected;
-              } else if(state >= CollisionSolver::InternalError) {
-                  return state;
-              }
-          }
-      }
-      // end sparse matrix assembly
-
-      // 4. Solve constraints
-      if(_constraintsInfo.constraintsCount + _constraintsInfo.contactsCount > 0) {
-
-          int state = _constraintSolver->solve(&_constraintsInfo);
-          if(state != Solver::OK) return state;
+          std::memcpy(f, y+_variablesCount, _variablesCount*sizeof(*f));
+	  if(fvar) std::memcpy(fvar, y+_variablesCount, _variablesCount*sizeof(*fvar));
+	  gatherAccelerations(f+_variablesCount, fvar ? fvar+_variablesCount : NULL);
 	  
-	  /*
-	   * apply friction force on the Contacted bodies here 
-	   * i.e. after the _constraintSolver->solve()  has been called and the 
-	   * forces due to joints are known
-	   *
-	   * Iterate through all the contacts in the contactValeList and 
-	   */
-
-          int offset = 0;
-          const BodyList::const_iterator b_end = _bodies.end();
-	  const ContactValueList::const_iterator c_end = _collisionSolver->_contacts.end();
-	  ContactValueList::iterator it;
-	  // make the same iterations here to first fill the normalforce of each contact.
-	  for(BodyList::iterator body = _bodies.begin(); body != b_end; ++body) {
+	  if (_constraintSolver)
+	  {
+	    // setup...
 	    
-	    for(it = _collisionSolver->_contacts.begin(); it != c_end; it++) {
-	      //find the value of force acting on the body before applying constraints.
-	      if((*(*body)).variablesOffset() == (*(*it).body0).variablesOffset() || 
-		(*(*body)).variablesOffset() == (*(*it).body1).variablesOffset()) 
-	      {
-		Vector2d currentForce = (*body)->force();
-	        Vector2d constraintForce(_constraintsInfo.force[offset], _constraintsInfo.force[offset+1]);
-		if(fabs(constraintForce.dot((*it).normal)) > (*it).normalForce)
-		  (*it).normalForce = fabs(constraintForce.dot((*it).normal));
-	         //qDebug()<<"normal force = "<<(*it).normalForce<<endl;
-	      }
-	      offset += (*body)->variablesCount();
-	    }
-	  }
-	  offset = 0;
-          for(BodyList::iterator body = _bodies.begin(); body != b_end; ++body) {
-	    
-	    for(it = _collisionSolver->_contacts.begin(); it != c_end; it++) {
+	    // check contacts
+	    int state = 0;
+	    if(_collisionSolver) {
+	      int contactsCount = 0;
+	      state = _collisionSolver->checkContacts(_bodies, false, &contactsCount);
 	      
-		/*
-		 * find the value of normal force by the contacts on it 
-		 * find \mu and then 
-		 */
-		if((*it).state == Contact::Contacted)
-		{ 
-		  Body* fBody = 0;
-		  Vector2d applicableForce(0,0); double applicableForceMagnitude = 0;
-		  if((*(*body)).variablesOffset() == (*(*it).body0).variablesOffset())
-		  { fBody = (*it).body0;	 qDebug()<<"firstBody"<<endl; qDebug()<<(*it).tangent[0]<<"  "<<(*it).tangent[1]<<endl; }
-		  else if((*(*body)).variablesOffset() == (*(*it).body1).variablesOffset())
-		  { fBody = (*it).body0;       qDebug()<<"secondbody"<<endl; qDebug()<<(*it).tangent[0]<<"  "<<(*it).tangent[1]<<endl; }
-		  else continue;
+	      if (contactsCount!=_constraintsInfo.contactsCount)
+	      {
+		_constraintsInfo.setDimension(_constraintsInfo.variablesCount,
+					      _constraintsInfo.constraintsCount,
+				contactsCount);
+	      }
+	    }
+	    
+	          if(_variablesCount>0)
+		  {
+		    ::new (&_constraintsInfo.position) MappedVector(y, _variablesCount);
+		    ::new (&_constraintsInfo.velocity) MappedVector(y+_variablesCount, _variablesCount);
+		    ::new (&_constraintsInfo.acceleration) MappedVector(f+_variablesCount, _variablesCount);
+		  }
 		  
-		  //Vector2d  contactForce(_constraintsInfo.force[offset], _constraintsInfo.force[offset+1]);
-		  double frictionLimit =  (*it)._frictionCoefficient*(*it).normalForce; //qDebug()<<"FrictionLimit="<<frictionLimit<<endl;
-		  // slipping part here...
-		  
-		  if((*it).slipState[0] == Contact::ForwardSlipping || (*it).slipState[0] == Contact::BackwardSlipping) {
-		    // check with the direction of the tangent
-		    // and apply friction in the right direction . Consider particles as well 
-		    
-		    RigidBody* firstBody = static_cast<RigidBody*>(fBody);
-		    if(firstBody->velocityWorld((*it).points[0]).dot((*it).tangent) > 0)
-		    {firstBody->applyForce(frictionLimit*((*it).tangent), (*it).points[0]);}
-		    else
-		      firstBody->applyForce(-frictionLimit*((*it).tangent), (*it).points[0]);
-		    qDebug()<<"applying friction due to relative velocity"<<endl;
-		    goto c;              // if friction is already applied do not apply it again
-		  }/*
-		  else if((*it).slipState[0] == Contact::BackwardSlipping) {
-		    // 
-		    RigidBody* firstBody = static_cast<RigidBody*>(fBody);
-		    if()
-		    firstBody->applyForce(frictionLimit*(*it).tangent, (*it).points[0]);
-		    qDebug()<<"applying friction due to relative velocity"<<endl;
-		    goto c;               // if friction has been applied do not apply again
-		  }*/
-		  
-		  Vector2d resultingForce = (*body)->force() + Vector2d(_constraintsInfo.force[offset], _constraintsInfo.force[offset+1]);
-		  
-		  if(frictionLimit > fabs((*it).tangent.dot(resultingForce)))
-		    applicableForceMagnitude = fabs((*it).tangent.dot(resultingForce));
-		  else 
-		    applicableForceMagnitude = frictionLimit;		    
-		    
-		  if((*it).tangent.dot(resultingForce) > 0) 
-		    applicableForce = -applicableForceMagnitude*((*it).tangent);
-		  else if((*it).tangent.dot(resultingForce) < 0)
-		    applicableForce = applicableForceMagnitude*((*it).tangent);
-		  else
-		    applicableForce.setZero();
-		 /*   
-		  if(fbody->metaObject()->inherits<Particle>()) {
-		      Particle* p = static_cast<Particle*>(fBody);
-		      p->applyForce(-applicableForce);
-		    }
-		    else if(fBody->metaObject()->inherits<RigidBody>()) {*/
-		      RigidBody* firstBody = static_cast<RigidBody*>(fBody);
-		      firstBody->applyForce(applicableForce, (*it).points[0]);
-		  //  }
-		    
-		 }
-	       } 
-	   c:	
-	   
-     	   // solve the joints here again to nullify the newly added 
-  	   // friction force on jointed-objects .	   
-	     gatherJointsInfo(&_constraintsInfo);
-	     int state = _constraintSolver->solve(&_constraintsInfo);
-	     if(state != Solver::OK) return state;                                                      
-	   (*body)->addForce(&_constraintsInfo.force[offset], NULL);
-	   (*body)->getAccelerations(f+_variablesCount+offset, NULL);
-           offset += (*body)->variablesCount();
-          }
-	}
-      }
-    return 0;
+		        // end sparse matrix assembly
+		              
+		                    // 2. Joints
+		                          gatherJointsInfo(&_constraintsInfo);
+					  
+					  // 3. Collisions (TODO: variances for collisions)
+					  if(_collisionSolver) {
+					    _collisionSolver->getContactsInfo(_constraintsInfo, false);
+					    if(state == Contact::Intersected) {
+					      if(_stopOnIntersection) return Solver::IntersectionDetected;
+					    } else {
+					      if(state == Contact::Colliding) {
+						if(_stopOnCollision) return Solver::CollisionDetected;
+						// XXX: We are not stopping on colliding contact
+						// and resolving them only at the end of timestep
+						// XXX: is it right solution ? Shouldn't we try to find
+						// contact point more exactly for example using binary search ?
+						//_collisionTime = t;
+						//_collisionTime = t;
+						//if(t < _collisionExpectedTime)
+						//    return DantzigLCPCollisionSolver::CollisionDetected;
+					      } else if(state >= CollisionSolver::InternalError) {
+						return state;
+					      }
+					    }
+					  }
+					        // end sparse matrix assembly
+					        
+					              // 4. Solve constraints
+					                    if(_constraintsInfo.constraintsCount + _constraintsInfo.contactsCount > 0) {
+							      
+							      int state = _constraintSolver->solve(&_constraintsInfo);
+							      if(state != Solver::OK) return state;
+						     
+						     int offset = 0;
+						     const BodyList::const_iterator b_end = _bodies.end();
+						     for(BodyList::iterator body = _bodies.begin(); body != b_end; ++body) {
+						       (*body)->addForce(&_constraintsInfo.force[offset], NULL);
+						       (*body)->getAccelerations(f+_variablesCount+offset, NULL);
+						       offset += (*body)->variablesCount();
+						     }
+							    }
+	  }
+	  
+	      return 0;
 }
-
 int World::solverFunction(double t, const double* y,
                 const double* yvar, double* f, double* fvar, void* params)
 {
