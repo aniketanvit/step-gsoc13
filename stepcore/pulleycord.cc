@@ -7,7 +7,7 @@
 #include "vector.h"
 #include <QtGlobal>
 #include <cmath>
-
+//#include <float.h>
 namespace StepCore {
 
   STEPCORE_META_OBJECT(PulleyCord, QT_TRANSLATE_NOOP("ObjectClass", "PulleyCord"), QT_TR_NOOP("Massless Pulley with a cord"), 0, 
@@ -37,8 +37,12 @@ PulleyCord::PulleyCord(Vector2d position, double radius, Item* body1, Item* body
   double x2 = _radius;
   double y2 = Vector2d(_position-position2()).squaredNorm() - pow(_radius, 2);
   y2 = sqrt(y2);
-  end1 = Vector2d(_position[0] - _radius + cos(angle1), sin(angle1));
-  end2 = Vector2d(_position[1] + _radius - cos(angle1), sin(angle1));
+  //end1 = Vector2d(_position[0] - _radius + cos(angle1), sin(angle1));
+  //end2 = Vector2d(_position[1] + _radius - cos(angle1), sin(angle1));
+
+  end1 = Vector2d(_position[0] - _radius, _position[1]);
+  end2 = Vector2d(_position[0] + _radius, _position[1]);
+  
 }
 
 void PulleyCord::setBody1(Object* body1)
@@ -93,34 +97,122 @@ void PulleyCord::setBody2(Object* body2)
 
 int PulleyCord::constraintsCount()
 {
-  if(!_body1 && !_body2) return 0;
+  if(_body1 && _body2) 
+    return 2;
   // XXX  what value should we return here ?
-  return 2;
+  else 
+    return 0;
 }
 
 void PulleyCord::getConstraintsInfo(ConstraintsInfo* info, int offset)
 {
-  /*
-   * 
-   * problem ...
-   * how to fill the values in the info->value, info->derivative, info->jacobian, info->jacobianDerivative
-   * matrices
-   * 
-   */
+  double l1 = 0, l2 = 0, tmass = 0;
+  
+  Vector2d d1 = position1() - end1;
+  Vector2d d2 = position2() - end2;
+  d1 = d1/d1.norm();
+  d2 = d2/d2.norm();
+  
+  l1 = d1.norm();
+  l2 = d2.norm();
+  Vector2d v1(0,0), v2(0,0), f1(0,0), f2(0,0);
+  
+  if(_r1) {
+    v1 = _r1->velocity();
+    f1 = _r1->force();
+    tmass += _r1->mass();
+  }
+  else if(_p1) {
+    v1 = _p1->velocity();
+    f1 = _p1->force();
+    tmass += _p1->mass();
+  }
+  
+  if(_r2) {
+    v2 = _r2->velocity();
+    f2 = _r2->force();
+    tmass += _r2->mass();
+  }
+  else if(_p2) {
+    v2 = _p2->velocity();
+    f2 = _p2->force();
+    tmass += _p2->mass();
+  }
+  
+  if(d1.dot(v1) > 0){
+    if(d1.dot(v1) - d2.dot(v2) >0)
+      _inTension = true;
+  }
+  else if (d1.dot(f1) > 0) {
+    if(d1.dot(f1) - d2.dot(f2) > 0)
+      _inTension = true;
+  }
+  
+  if(_inTension) {
+    
+  
+  double factor = fabs(f1.norm() - f2.norm())/(tmass);
+    
+  info->value[offset] = ( l1 + l2 - _lengthOfCord );
+  info->derivative[offset] = 0 ;
+  
+  if(_r1){
+       
+    info->jacobian.coeffRef(offset, _r1->variablesOffset() + RigidBody::PositionOffset)   = (d1[0]);
+    info->jacobian.coeffRef(offset, _r1->variablesOffset() + RigidBody::PositionOffset+1) = (d1[1]);
+    info->jacobian.coeffRef(offset, _r1->variablesOffset() + RigidBody::AngleOffset)      =  0;
+    
+    info->jacobianDerivative.coeffRef(offset, _r1->variablesOffset() + RigidBody::PositionOffset)
+    = ((1+factor)* d1[0] );
+    info->jacobianDerivative.coeffRef(offset, _r1->variablesOffset() + RigidBody::PositionOffset+1)
+    = ((1+factor)* d1[1]);
+    info->jacobianDerivative.coeffRef(offset, _r1->variablesOffset() + RigidBody::AngleOffset)      = 0;
+        
+  }
+  else if(_p1) {
+    info->jacobian.coeffRef(offset, _p1->variablesOffset() + Particle::PositionOffset)     =   (d1[0]);
+    info->jacobian.coeffRef(offset, _p1->variablesOffset() + Particle::PositionOffset+1)   =   (d1[1]);
+    
+    info->jacobianDerivative.coeffRef(offset, _p1->variablesOffset() + Particle::PositionOffset)
+    = ((1+factor)* d1[0]);
+    info->jacobianDerivative.coeffRef(offset, _p1->variablesOffset() + Particle::PositionOffset+1)
+    = ((1+factor)* d1[1]);
+   
+  }
+  
+  if(_r2) {
+    info->jacobian.coeffRef(offset, _r2->variablesOffset() + RigidBody::PositionOffset) = d2[0];
+    info->jacobian.coeffRef(offset, _r2->variablesOffset() + RigidBody::PositionOffset+1) = d2[1];
+    info->jacobian.coeffRef(offset, _r2->variablesOffset() + RigidBody::AngleOffset)      = 0;
+    
+    info->jacobianDerivative.coeffRef(offset, _r2->variablesOffset() + RigidBody::PositionOffset)  = ((1-factor)*d1[0]);
+    info->jacobianDerivative.coeffRef(offset, _r2->variablesOffset() + RigidBody::PositionOffset+1) =((1-factor)*d1[1]);
+    info->jacobianDerivative.coeffRef(offset, _r2->variablesOffset() + RigidBody::AngleOffset)     = 0 ;
+  }
+  else if(_p2) {
+    info->jacobian.coeffRef(offset, _p2->variablesOffset() + Particle::PositionOffset)    =  d2[0];
+    info->jacobian.coeffRef(offset, _p2->variablesOffset() + Particle::PositionOffset+1)  =  d2[1];
+    
+    info->jacobianDerivative.coeffRef(offset, _p2->variablesOffset() + Particle::PositionOffset)  = ((1-factor)*d1[0]); 
+    info->jacobianDerivative.coeffRef(offset, _p2->variablesOffset() + Particle::PositionOffset+1) = ((1-factor)* d1[1]);
+    
+  }
+  }
+  
 }
 
 Vector2d PulleyCord::velocity1() const
 {
   if(_p1) return _p1->velocity();
   else if(_r1) return _r1->velocityLocal(_localPosition1);
-  else return Vector2d::Zero();
+  else return Vector2d(0,0);
 }
 
 Vector2d PulleyCord::velocity2() const
 {
   if(_p1) return _p1->velocity();
   else if(_r1) return _r1->velocityLocal(_localPosition1);
-  else return Vector2d::Zero();
+  else return Vector2d(0,0);
 }
 
 Vector2d PulleyCord::position1() const

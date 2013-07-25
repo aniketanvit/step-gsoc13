@@ -22,8 +22,11 @@ public:
   void viewScaleChanged();
   void worldDataChanged(bool dynamicOnly);
 protected:
-  void mouseSetPos(const QPointF& pos, const QPointF& diff, MovingState movingState);
+  //void mouseSetPos(const QPointF& pos, const QPointF& diff, MovingState movingState);
+  void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
+  void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
   int _num;
+  bool _moving;
   
 };
 
@@ -47,7 +50,7 @@ protected:
   double _rnorm;
   double _rscale;
   double _radius;
-  static void tryAttach(StepCore::Item* item, WorldScene* worldScene, const QPointF& pos, int num);
+  //static void tryAttach(StepCore::Item* item, WorldScene* worldScene, const QPointF& pos, int num);
   PulleyCordHandlerGraphicsItem* _handler1;
   PulleyCordHandlerGraphicsItem* _handler2;
   friend class PulleyCordCreator;
