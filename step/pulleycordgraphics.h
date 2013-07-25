@@ -22,9 +22,9 @@ public:
   void viewScaleChanged();
   void worldDataChanged(bool dynamicOnly);
 protected:
-  //void mouseSetPos(const QPointF& pos, const QPointF& diff, MovingState movingState);
-  void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
-  void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+  void mouseSetPos(const QPointF& pos, const QPointF& diff, MovingState movingState);
+  //void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
+  //void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
   int _num;
   bool _moving;
   
