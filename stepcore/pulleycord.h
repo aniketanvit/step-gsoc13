@@ -16,7 +16,7 @@ class PulleyCord : public Item, public Joint
   STEPCORE_OBJECT(PulleyCord)
   
 public:
-   explicit PulleyCord(Vector2d position=Vector2d::Zero(), double radius=1, Item* body1 = 0, Item* body2 = 0);
+   explicit PulleyCord(Vector2d position=Vector2d::Zero(), double radius=0.5, Item* body1 = NULL, Item* body2 = NULL);
   
   int constraintsCount();
   void getConstraintsInfo(ConstraintsInfo* info, int offset);

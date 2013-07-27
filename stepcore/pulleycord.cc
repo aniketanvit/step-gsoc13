@@ -6,8 +6,6 @@
 #include "object.h"
 #include "vector.h"
 #include <QtGlobal>
-#include <cmath>
-//#include <float.h>
 namespace StepCore {
 
   STEPCORE_META_OBJECT(PulleyCord, QT_TRANSLATE_NOOP("ObjectClass", "PulleyCord"), QT_TR_NOOP("Massless Pulley with a cord"), 0, 
@@ -26,17 +24,19 @@ namespace StepCore {
      )  
  
 PulleyCord::PulleyCord(Vector2d position, double radius, Item* body1, Item* body2) :
-                     _position(position), _radius(radius), _body1(body1), _body2(body2), _lengthOfCord(0),
+                     _position(position), _radius(radius), _lengthOfCord(0),
                      _tension(0), _inTension(false), _localPosition1(0,0), _localPosition2(0,0),
                      _p1(0), _p2(0), _r1(0), _r2(0)
 {
-  double x1 = _radius;
+  setBody1(body1);
+  setBody2(body2);
+  /*double x1 = _radius;
   double y1 = Vector2d(_position-position1()).squaredNorm() - pow(_radius, 2);
   y1 = sqrt(y1);
   double angle1 = atan2(x1, y1);
   double x2 = _radius;
   double y2 = Vector2d(_position-position2()).squaredNorm() - pow(_radius, 2);
-  y2 = sqrt(y2);
+  y2 = sqrt(y2);*/
   //end1 = Vector2d(_position[0] - _radius + cos(angle1), sin(angle1));
   //end2 = Vector2d(_position[1] + _radius - cos(angle1), sin(angle1));
 
@@ -98,8 +98,7 @@ void PulleyCord::setBody2(Object* body2)
 int PulleyCord::constraintsCount()
 {
   if(_body1 && _body2) 
-    return 2;
-  // XXX  what value should we return here ?
+    return 1;
   else 
     return 0;
 }
@@ -107,16 +106,18 @@ int PulleyCord::constraintsCount()
 void PulleyCord::getConstraintsInfo(ConstraintsInfo* info, int offset)
 {
   double l1 = 0, l2 = 0, tmass = 0;
-  
+  double factor = 0;
   Vector2d d1 = position1() - end1;
   Vector2d d2 = position2() - end2;
-  d1 = d1/d1.norm();
-  d2 = d2/d2.norm();
   
   l1 = d1.norm();
   l2 = d2.norm();
-  Vector2d v1(0,0), v2(0,0), f1(0,0), f2(0,0);
   
+  d1 = d1/d1.norm();
+  d2 = d2/d2.norm();
+  
+  Vector2d v1(0,0), v2(0,0), f1(0,0), f2(0,0);
+  /*
   if(_r1) {
     v1 = _r1->velocity();
     f1 = _r1->force();
@@ -138,23 +139,17 @@ void PulleyCord::getConstraintsInfo(ConstraintsInfo* info, int offset)
     f2 = _p2->force();
     tmass += _p2->mass();
   }
-  
-  if(d1.dot(v1) > 0){
-    if(d1.dot(v1) - d2.dot(v2) >0)
+  */
+    if(d1.dot(v1) + d2.dot(v2) >0)
       _inTension = true;
-  }
-  else if (d1.dot(f1) > 0) {
-    if(d1.dot(f1) - d2.dot(f2) > 0)
-      _inTension = true;
-  }
   
   if(_inTension) {
     
   
-  double factor = fabs(f1.norm() - f2.norm())/(tmass);
+  //double factor = fabs(f1.norm() - f2.norm())/(tmass);
     
   info->value[offset] = ( l1 + l2 - _lengthOfCord );
-  info->derivative[offset] = 0 ;
+  info->derivative[offset] =  0;
   
   if(_r1){
        

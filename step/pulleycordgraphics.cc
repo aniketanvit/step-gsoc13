@@ -64,6 +64,7 @@ PulleyCordHandlerGraphicsItem::PulleyCordHandlerGraphicsItem(StepCore::Item* ite
 {
   Q_ASSERT(_num == 1 || _num == 2);
   setFlag(QGraphicsItem::ItemIsMovable);
+  setFlag(QGraphicsItem::ItemIsSelectable);
   setZValue(HANDLER_ZVALUE);
   setExclusiveMoving(true);
   setExclusiveMovingMessage(i18n("Move cord of %1", _item->name()));
@@ -89,8 +90,8 @@ void PulleyCordHandlerGraphicsItem::worldDataChanged(bool)
 
 void PulleyCordHandlerGraphicsItem::mouseSetPos(const QPointF& pos, const QPointF&, MovingState movingState)
 {
-  static_cast<WorldScene*>(scene())->snapItem(parentItem()->mapToParent(pos),
-                                     WorldScene::SnapRigidBody |
+  static_cast<WorldScene*>(scene())->pulleySnapItem(parentItem()->mapToParent(pos),
+                                     WorldScene::SnapRigidBody | WorldScene::SnapSetPosition |
 				     WorldScene::SnapSetLocalPosition | WorldScene::SnapSetPosition,
 				     0, movingState, _item, _num);
   /*
@@ -103,7 +104,29 @@ void PulleyCordHandlerGraphicsItem::mouseSetPos(const QPointF& pos, const QPoint
   }else if(_num == 2){
     _worldModel->setProperty(_item, "body2", QVariant::fromValue<StepCore::Object*>(i), WorldModel::UndoNoMerge);
   }
-  */
+  
+  
+    foreach(QGraphicsItem* it, scene()->items(pos)) {
+      StepCore::Item* item = static_cast<WorldScene*>(scene())->itemFromGraphics(it);
+      if(dynamic_cast<StepCore::Particle*>(item) || dynamic_cast<StepCore::RigidBody*>(item)) {
+	StepCore::Vector2d lPos(0, 0);
+	if(dynamic_cast<StepCore::RigidBody*>(item))
+	  lPos = dynamic_cast<StepCore::RigidBody*>(item)->pointWorldToLocal(WorldGraphicsItem::pointToVector(pos));
+	if(_num == 1){
+	_worldModel->setProperty(_item, "body1",
+				 QVariant::fromValue<StepCore::Object*>(item), WorldModel::UndoNoMerge);
+	_worldModel->setProperty(_item, "localPosition1", QVariant::fromValue(lPos));
+      
+	}
+	else if(_num == 2){
+	  _worldModel->setProperty(_item, "body2",
+				   QVariant::fromValue<StepCore::Object*>(item), WorldModel::UndoNoMerge);
+	  _worldModel->setProperty(_item, "localPosition2", QVariant::fromValue(lPos));	  
+	}
+    }
+}
+*/
+
 }
 
 PulleyCordGraphicsItem::PulleyCordGraphicsItem(StepCore::Item* item, WorldModel* worldModel)
@@ -111,6 +134,7 @@ PulleyCordGraphicsItem::PulleyCordGraphicsItem(StepCore::Item* item, WorldModel*
 {
   Q_ASSERT(dynamic_cast<StepCore::PulleyCord*>(_item) != NULL);
   setFlag(QGraphicsItem::ItemIsMovable);
+  setFlag(QGraphicsItem::ItemIsSelectable);
   setZValue(JOINT_ZVALUE);
   _handler1 = new PulleyCordHandlerGraphicsItem(item, worldModel, this, 1);
   _handler2 = new PulleyCordHandlerGraphicsItem(item, worldModel, this, 2);
@@ -148,13 +172,14 @@ void PulleyCordGraphicsItem::worldDataChanged(bool dynamicOnly)
 }
 
 void PulleyCordGraphicsItem::stateChanged()
-{if(_isSelected) {
+{
+  if(_isSelected) {
   _handler1->setVisible(true);
   _handler2->setVisible(true);
 }
 else {
-  _handler1->setVisible(false);
-  _handler2->setVisible(false);
+  _handler1->setVisible(true);
+  _handler2->setVisible(true);
 }
   
   viewScaleChanged();
