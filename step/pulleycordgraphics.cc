@@ -90,42 +90,11 @@ void PulleyCordHandlerGraphicsItem::worldDataChanged(bool)
 
 void PulleyCordHandlerGraphicsItem::mouseSetPos(const QPointF& pos, const QPointF&, MovingState movingState)
 {
-  static_cast<WorldScene*>(scene())->pulleySnapItem(parentItem()->mapToParent(pos),
+  static_cast<WorldScene*>(scene())->snapItem(parentItem()->mapToParent(pos),
                                      WorldScene::SnapRigidBody | WorldScene::SnapSetPosition |
 				     WorldScene::SnapSetLocalPosition | WorldScene::SnapSetPosition,
 				     0, movingState, _item, _num);
-  /*
-  QGraphicsItem* ggItem = static_cast<WorldScene*>(scene())->itemAt(pos);
-  WorldGraphicsItem* gItem = static_cast<WorldGraphicsItem*>(ggItem);
-  StepCore::Item* ii = static_cast<WorldScene*>(scene())->itemFromGraphics(gItem);
-  StepCore::Object* i = static_cast<StepCore::Object*>(ii);
-  if(_num == 1){
-  _worldModel->setProperty(_item, "body1", QVariant::fromValue<StepCore::Object*>(i), WorldModel::UndoNoMerge);
-  }else if(_num == 2){
-    _worldModel->setProperty(_item, "body2", QVariant::fromValue<StepCore::Object*>(i), WorldModel::UndoNoMerge);
-  }
-  
-  
-    foreach(QGraphicsItem* it, scene()->items(pos)) {
-      StepCore::Item* item = static_cast<WorldScene*>(scene())->itemFromGraphics(it);
-      if(dynamic_cast<StepCore::Particle*>(item) || dynamic_cast<StepCore::RigidBody*>(item)) {
-	StepCore::Vector2d lPos(0, 0);
-	if(dynamic_cast<StepCore::RigidBody*>(item))
-	  lPos = dynamic_cast<StepCore::RigidBody*>(item)->pointWorldToLocal(WorldGraphicsItem::pointToVector(pos));
-	if(_num == 1){
-	_worldModel->setProperty(_item, "body1",
-				 QVariant::fromValue<StepCore::Object*>(item), WorldModel::UndoNoMerge);
-	_worldModel->setProperty(_item, "localPosition1", QVariant::fromValue(lPos));
-      
-	}
-	else if(_num == 2){
-	  _worldModel->setProperty(_item, "body2",
-				   QVariant::fromValue<StepCore::Object*>(item), WorldModel::UndoNoMerge);
-	  _worldModel->setProperty(_item, "localPosition2", QVariant::fromValue(lPos));	  
-	}
-    }
-}
-*/
+
 
 }
 
@@ -205,43 +174,4 @@ void PulleyCordGraphicsItem::viewScaleChanged()
   _boundingRect = _painterPath.boundingRect();
   _boundingRect.adjust(-1/2,-1/2,1/2,1/2);
 }
-
-
-void PulleyCordGraphicsItem::mouseSetPos(const QPointF& /*pos*/, const QPointF& diff, MovingState)
-{
-  _worldModel->simulationPause();
-  
-  if(pulleyCord()->body1()) {
-    Q_ASSERT(pulleyCord->body1()->metaObject()->inherits<StepCore::Item>());
-    WorldGraphicsItem* gItem = static_cast<WorldScene*>(
-      scene())->graphicsFromItem(static_cast<StepCore::Item*>(pulleyCord()->body1()));
-      Q_ASSERT(gItem != NULL);
-      if(!gItem->isSelected()) {
-	_worldModel->setProperty(_item, "localPosition1",
-				 _item->metaObject()->property("position1")->readVariant(_item));
-	_worldModel->setProperty(_item, "body1",
-	                         QVariant::fromValue<StepCore::Object*>(NULL), WorldModel::UndoNoMerge);
-      }
-  } else {
-    _worldModel->setProperty(_item, "localPosition1", 
-			     QVariant::fromValue( (pulleyCord()->position1() + pointToVector(diff)).eval() ));
-  }
-  
-      if(pulleyCord()->body2()) {
-	Q_ASSERT(pulleyCord()->body2()->metaObject()->inherits<StepCore::Item>());
-	WorldGraphicsItem* gItem = static_cast<WorldScene*>(
-	  scene())->graphicsFromItem(static_cast<StepCore::Item*>(pulleyCord()->body2()));
-	  Q_ASSERT(gItem != NULL);
-	  if(!gItem->isSelected()) {
-	    _worldModel->setProperty(_item, "localPosition2",
-				     _item->metaObject()->property("position2")->readVariant(_item));
-				                 _worldModel->setProperty(_item, "body2", QString(), WorldModel::UndoNoMerge);
-	  }
-      } else {
-	_worldModel->setProperty(_item, "localPosition2",
-				 QVariant::fromValue( (pulleyCord()->position2() + pointToVector(diff)).eval() ));
-      }
-}
-
-
 

@@ -105,8 +105,7 @@ int PulleyCord::constraintsCount()
 
 void PulleyCord::getConstraintsInfo(ConstraintsInfo* info, int offset)
 {
-  double l1 = 0, l2 = 0, tmass = 0;
-  double factor = 0;
+  double l1 = 0, l2 = 0;
   Vector2d d1 = position1() - end1;
   Vector2d d2 = position2() - end2;
   
@@ -118,34 +117,11 @@ void PulleyCord::getConstraintsInfo(ConstraintsInfo* info, int offset)
   
   Vector2d v1 = velocity1();
   Vector2d v2 = velocity2();
-  /*
-  if(_r1) {
-    v1 = _r1->velocity();
-    f1 = _r1->force();
-    tmass += _r1->mass();
-  }
-  else if(_p1) {
-    v1 = _p1->velocity();
-    f1 = _p1->force();
-    tmass += _p1->mass();
-  }
   
-  if(_r2) {
-    v2 = _r2->velocity();
-    f2 = _r2->force();
-    tmass += _r2->mass();
-  }
-  else if(_p2) {
-    v2 = _p2->velocity();
-    f2 = _p2->force();
-    tmass += _p2->mass();
-  }
-  */
     if(d1.dot(v1) + d2.dot(v2) >0)
       _inTension = true;
   
   if(_inTension) {
-  //double factor = fabs(f1.norm() - f2.norm())/(tmass);
     
   info->value[offset] = ( l1 + l2 - _lengthOfCord );
   info->derivative[offset] =  (-d1.dot(v1) - d2.dot(v2));
@@ -159,9 +135,9 @@ void PulleyCord::getConstraintsInfo(ConstraintsInfo* info, int offset)
     info->jacobian.coeffRef(offset, _r1->variablesOffset() + RigidBody::AngleOffset)      =  (r1[0]*d1[1] - r1[1]*d1[0]);
     
     info->jacobianDerivative.coeffRef(offset, _r1->variablesOffset() + RigidBody::PositionOffset)
-    = (d1[0] );
+    = (v1[0] );
     info->jacobianDerivative.coeffRef(offset, _r1->variablesOffset() + RigidBody::PositionOffset+1)
-    = (d1[1]);
+    = (v1[1]);
     info->jacobianDerivative.coeffRef(offset, _r1->variablesOffset() + RigidBody::AngleOffset)      = 0;
         
   }
@@ -170,9 +146,9 @@ void PulleyCord::getConstraintsInfo(ConstraintsInfo* info, int offset)
     info->jacobian.coeffRef(offset, _p1->variablesOffset() + Particle::PositionOffset+1)   =   (-d1[1]);
     
     info->jacobianDerivative.coeffRef(offset, _p1->variablesOffset() + Particle::PositionOffset)
-    = (d1[0]);
+    = (v1[0]);
     info->jacobianDerivative.coeffRef(offset, _p1->variablesOffset() + Particle::PositionOffset+1)
-    = (d1[1]);
+    = (v1[1]);
    
   }
   
@@ -184,16 +160,16 @@ void PulleyCord::getConstraintsInfo(ConstraintsInfo* info, int offset)
     info->jacobian.coeffRef(offset, _r2->variablesOffset() + RigidBody::PositionOffset+1) = (-d2[1]);
     info->jacobian.coeffRef(offset, _r2->variablesOffset() + RigidBody::AngleOffset)      = (r2[0]*d1[1] - r2[1]*d1[0]);
     
-    info->jacobianDerivative.coeffRef(offset, _r2->variablesOffset() + RigidBody::PositionOffset)  = (d1[0]);
-    info->jacobianDerivative.coeffRef(offset, _r2->variablesOffset() + RigidBody::PositionOffset+1) =(d1[1]);
-    info->jacobianDerivative.coeffRef(offset, _r2->variablesOffset() + RigidBody::AngleOffset)     = 0 ;
+    info->jacobianDerivative.coeffRef(offset, _r2->variablesOffset() + RigidBody::PositionOffset)  = (v2[0]);
+    info->jacobianDerivative.coeffRef(offset, _r2->variablesOffset() + RigidBody::PositionOffset+1) = (v2[0]);
+    info->jacobianDerivative.coeffRef(offset, _r2->variablesOffset() + RigidBody::AngleOffset)     = (0) ;
   }
   else if(_p2) {
     info->jacobian.coeffRef(offset, _p2->variablesOffset() + Particle::PositionOffset)    =  (-d2[0]);
     info->jacobian.coeffRef(offset, _p2->variablesOffset() + Particle::PositionOffset+1)  =  (-d2[1]);
     
-    info->jacobianDerivative.coeffRef(offset, _p2->variablesOffset() + Particle::PositionOffset)  = (); 
-    info->jacobianDerivative.coeffRef(offset, _p2->variablesOffset() + Particle::PositionOffset+1) = ();
+    info->jacobianDerivative.coeffRef(offset, _p2->variablesOffset() + Particle::PositionOffset)  = (v2[0]); 
+    info->jacobianDerivative.coeffRef(offset, _p2->variablesOffset() + Particle::PositionOffset+1) = (v2[0]);
     
   }
   }
