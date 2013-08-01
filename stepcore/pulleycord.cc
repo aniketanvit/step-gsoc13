@@ -28,18 +28,8 @@ PulleyCord::PulleyCord(Vector2d position, double radius, Item* body1, Item* body
                      _tension(0), _inTension(false), _localPosition1(0,0), _localPosition2(0,0),
                      _p1(0), _p2(0), _r1(0), _r2(0)
 {
-  setBody1(body1);
-  setBody2(body2);
-  /*double x1 = _radius;
-  double y1 = Vector2d(_position-position1()).squaredNorm() - pow(_radius, 2);
-  y1 = sqrt(y1);
-  double angle1 = atan2(x1, y1);
-  double x2 = _radius;
-  double y2 = Vector2d(_position-position2()).squaredNorm() - pow(_radius, 2);
-  y2 = sqrt(y2);*/
-  //end1 = Vector2d(_position[0] - _radius + cos(angle1), sin(angle1));
-  //end2 = Vector2d(_position[1] + _radius - cos(angle1), sin(angle1));
-
+  setBody1(NULL);
+  setBody2(NULL);
   end1 = Vector2d(_position[0] - _radius, _position[1]);
   end2 = Vector2d(_position[0] + _radius, _position[1]);
   
@@ -47,60 +37,56 @@ PulleyCord::PulleyCord(Vector2d position, double radius, Item* body1, Item* body
 
 void PulleyCord::setBody1(Object* body1)
 {
-  if(body1)
-  {
+  if(body1) {
     if(body1->metaObject()->inherits<Particle>()) {
+      _body1 = body1;
       _p1 = static_cast<Particle*>(body1);
       _r1 = NULL;
-      Vector2d dc1(_position[0]+_radius, _position[1]);
-      dc1 = _p1->position() - dc1;
-      _lengthOfCord += dc1.norm();
       return;
-    }
-    else if(body1->metaObject()->inherits<RigidBody>()) {
+    } else if(body1->metaObject()->inherits<RigidBody>()) {
+      _body1 = body1;
       _p1 = NULL;
       _r1 = static_cast<RigidBody*>(body1);
-      Vector2d dc1(_position[0]+_radius, _position[1]);
-      dc1 = _r1->position() - dc1;
-      _lengthOfCord += dc1.norm(); 
       return;
     }
   }
-  _p1 = NULL;
-  _r1 = NULL; 
+      _body1 = NULL;
+      _p1 = NULL;
+      _r1 = NULL;
 }
 
 void PulleyCord::setBody2(Object* body2)
 {
-  if(body2)
-  {
+  if(body2) {
     if(body2->metaObject()->inherits<Particle>()) {
+      _body2 = body2;
       _p2 = static_cast<Particle*>(body2);
       _r2 = NULL;
-      Vector2d dc2(_position[0]+_radius, _position[1]);
-      dc2 = _p1->position() - dc2;
-      _lengthOfCord += dc2.norm();
+      return;
+    } else if(body2->metaObject()->inherits<RigidBody>()) {
+      _body2 = body2;
+      _p2 = NULL;
+      _r2 = static_cast<RigidBody*>(body2);
       return;
     }
-        else if(body2->metaObject()->inherits<RigidBody>()) {
-	  _p2 = NULL;
-	  _r2 = static_cast<RigidBody*>(body2);
-	  Vector2d dc2(_position[0]-_radius, _position[1]);
-	  dc2 = _r2->position() - dc2;
-	  _lengthOfCord += dc2.norm(); 
-	  return;
-	}
   }
-    _p2 = NULL;
-    _r2 = NULL;  
+      _body2 = NULL;
+      _p2 = NULL;
+      _r2 = NULL;
 }
 
 int PulleyCord::constraintsCount()
 {
   if(_body1 && _body2) 
+  {
+    _inTension = true;
     return 1;
-  else 
+  }
+  else
+  {
+    _inTension = false;
     return 0;
+  }
 }
 
 void PulleyCord::getConstraintsInfo(ConstraintsInfo* info, int offset)
@@ -118,8 +104,8 @@ void PulleyCord::getConstraintsInfo(ConstraintsInfo* info, int offset)
   Vector2d v1 = velocity1();
   Vector2d v2 = velocity2();
   
-    if(d1.dot(v1) + d2.dot(v2) >0)
-      _inTension = true;
+  //  if(d1.dot(v1) + d2.dot(v2) >0)
+    //  _inTension = true;
   
   if(_inTension) {
     
