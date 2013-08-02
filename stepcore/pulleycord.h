@@ -49,7 +49,7 @@ public:
   void setBody2(Object* body2);
   
   Object* body1() const { return _body1; }
-  Object* body2() const { return _body1; }
+  Object* body2() const { return _body2; }
   
   Particle* particle1() const { return _p1; }
   Particle* particle2() const { return _p2; }
@@ -61,11 +61,16 @@ public:
   
   Vector2d end1;         // the point on the pulley where the left end of cord meets it. i.e. tangent from the cord to the pulley
   Vector2d end2;         // the point on the pulley where the left end of cord meets it. i.e. tangent from the cord to the pulley
+  double _length1;
+  double _length2;
 protected:
   
   Vector2d _position;
   double _radius; 
-    
+  
+  Object* _body1;
+  Object* _body2;
+  
   double _lengthOfCord;
   
   double _tension;
@@ -73,9 +78,6 @@ protected:
   
   Vector2d _localPosition1;
   Vector2d _localPosition2;
-  
-  Object* _body1;
-  Object* _body2;
   
   Particle*  _p1;
   Particle*  _p2;
