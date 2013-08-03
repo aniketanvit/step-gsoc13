@@ -54,19 +54,18 @@ int CGConstraintSolver::solve(ConstraintsInfo* info)
     IterationController iter(2.0E-5); // XXX
 
     // print debug info
-    /*std::cout << "ConstraintSolver:" << endl
-              << "J=" << info->jacobian << endl
-              << "J'=" << info->jacobianDerivative << endl
-              << "C=" << info->value << endl
-              << "C'=" << info->derivative << endl
-              << "invM=" << info->inverseMass << endl
-              << "pos=" << info->position << endl
-              << "vel=" << info->velocity << endl
-              << "acc=" << info->acceleration << endl
-              << "a=" << a << endl
-              << "b=" << b << endl
-              << "l=" << l << endl
-              << "force=" << info->force << endl;*/
+    std::cout << "ConstraintSolver:" << std::endl
+              << "J=" << info->jacobian << std::endl
+              << "J'=" << info->jacobianDerivative << std::endl
+              << "C=" << info->value << std::endl
+              << "C'=" << info->derivative << std::endl
+              << "invM=" << info->inverseMass << std::endl
+              << "pos=" << info->position << std::endl
+              << "vel=" << info->velocity << std::endl
+              << "acc=" << info->acceleration << std::endl
+              << "a=" << a << std::endl
+              << "b=" << b << std::endl
+              << "force=" << info->force << std::endl;
 
     // constrained_cg ?
     // XXX: limit iterations count
@@ -101,19 +100,18 @@ int CGConstraintSolver::solve(ConstraintsInfo* info)
     info->force = info->jacobian.transpose() * x;
 
     // print debug info
-    /*std::cout << "Solved:" << endl
-              << "J=" << info->jacobian << endl
-              << "J'=" << info->jacobianDerivative << endl
-              << "C=" << info->value << endl
-              << "C'=" << info->derivative << endl
-              << "invM=" << info->inverseMass << endl
-              << "pos=" << info->position << endl
-              << "vel=" << info->velocity << endl
-              << "acc=" << info->acceleration << endl
-              << "a=" << a << endl
-              << "b=" << b << endl
-              << "l=" << l << endl
-              << "force=" << info->force << endl << endl << endl;*/
+    std::cout << "Solved:" << std::endl
+              << "J=" << info->jacobian << std::endl
+              << "J'=" << info->jacobianDerivative << std::endl
+              << "C=" << info->value << std::endl
+              << "C'=" << info->derivative << std::endl
+              << "invM=" << info->inverseMass << std::endl
+              << "pos=" << info->position << std::endl
+              << "vel=" << info->velocity << std::endl
+              << "acc=" << info->acceleration << std::endl
+              << "a=" << a << std::endl
+              << "b=" << b << std::endl
+              << "force=" << info->force<< std::endl;
     return 0;
 }
 
