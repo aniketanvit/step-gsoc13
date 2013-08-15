@@ -111,6 +111,7 @@ void CoulombForce::calcForce(bool calcVariances)
 	    
 	    
 	    }
+	  }
 	 else if((*b1)->metaObject()->inherits<RigidBody>()) {
 	   if((*b2)->metaObject()->inherits<Particle>()) {
 	     
@@ -170,7 +171,7 @@ void CoulombForce::calcForce(bool calcVariances)
 	    
 	  }
 	
-    }
+    
 }
 
 	}
