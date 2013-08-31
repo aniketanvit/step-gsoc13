@@ -46,7 +46,7 @@ int CGConstraintSolver::solve(ConstraintsInfo* info)
     x.setZero();
 
     a = info->jacobian * (info->inverseMass.asDiagonal() * info->jacobian.transpose());
-
+    //b = -(info->jacobian * info->velocity);
     b = info->jacobian * info->acceleration;
     b += info->jacobianDerivative * info->velocity;
     b = - (b + info->value + info->derivative);

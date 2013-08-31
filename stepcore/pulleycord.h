@@ -22,7 +22,12 @@ public:
   void getConstraintsInfo(ConstraintsInfo* info, int offset);
 
   Vector2d position() const { return _position; }
-  void setPosition(const Vector2d position) { _position = position; }
+  void setPosition(const Vector2d position) 
+  {
+    _position = position;
+    end1 = Vector2d(_position[0] - _radius, _position[1]);
+    end2 = Vector2d(_position[0] + _radius, _position[1]);
+  }
   
   Vector2d position1() const;
   Vector2d position2() const;
@@ -31,7 +36,12 @@ public:
   Vector2d velocity2() const;
   
   double radius() const { return _radius; }
-  void setRadius(const double radius) { _radius = radius; }
+  void setRadius(const double radius)
+  {
+    _radius = radius;
+    end1 = Vector2d(_position[0] - _radius, _position[1]);
+    end2 = Vector2d(_position[0] + _radius, _position[1]);
+  }
   
   double lengthOfCord() const { return _lengthOfCord; }
   void setLengthOfCord(const double length) { _lengthOfCord = length; }
