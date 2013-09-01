@@ -225,7 +225,7 @@ void ConstraintsInfo::setDimension(int newVariablesCount, int newConstraintsCoun
 //     std::cerr << "   ConstraintsInfo::setDimension("
 //       << newVariablesCount <<","<< newConstraintsCount <<"," << newContactsCount << ")\n";
     
-    int totalConstraintsCount = newConstraintsCount+newContactsCount;
+    int totalConstraintsCount = newConstraintsCount+(2*newContactsCount);
 
     jacobian.resize(totalConstraintsCount, newVariablesCount);
     jacobianDerivative.resize(totalConstraintsCount, newVariablesCount);
@@ -756,7 +756,7 @@ int World::doEvolve(double delta)
 
                 ret = _solver->doEvolve(&time, endTime, &_variables,
                             _errorsCalculation ? &_variances : NULL);
-                
+                std::cout<<"inside the do-while loop"<<std::endl;
                 _time = time;
 
                 if(ret == Solver::IntersectionDetected || ret == Solver::CollisionDetected) {
@@ -808,9 +808,11 @@ int World::doEvolve(double delta)
                         // XXX: variances
                         _constraintsInfo.velocity += _constraintsInfo.inverseMass.asDiagonal() * _constraintsInfo.force;
                     }
-                } else goto out;
+                } 
+                else
+		  goto out;
 
-            } while(_time + stepSize/100 <= collisionEndTime); // XXX
+            }  while(_time + stepSize/100 <= collisionEndTime); // XXX
         } else if(ret != Solver::OK) goto out;
     }
 
