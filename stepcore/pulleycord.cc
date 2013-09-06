@@ -96,15 +96,9 @@ namespace StepCore {
 																				 int PulleyCord::constraintsCount()
 																				 {
 																				   if(_body1 && _body2)
-																				   {
-																				     Vector2d uA = position1() - end1;
-																				     Vector2d uB = position2() - end2;
+																				     return 1;
 																				     
-																				     if(velocity1().dot(uA) + velocity2().dot(uB) >= 0)
-																				       return 1;
-																				   }
-																				     
-																				      return 0;
+																				    return 0;
 																				 }
 																				 
 																				 void PulleyCord::getConstraintsInfo(ConstraintsInfo* info, int offset)
@@ -123,19 +117,16 @@ namespace StepCore {
 																				     Vector2d v1 = velocity1()/uA.norm();
 																				     Vector2d v2 = velocity2()/uB.norm();
 																				     
-																				     if(velocity1().dot(nA) + velocity2().dot(nB) < 0)
-																				       return;
-																				     
-																				     info->value[offset] = (_lengthOfCord - lA - lB);
-																				     info->derivative[offset] = (-velocity1().dot(nA) - velocity2().dot(nB));
+																				     info->value[offset] = (_lengthOfCord*_lengthOfCord - lA*lA - lB*lB)*(0.5);
+																				     info->derivative[offset] = (-velocity1().dot(nA) - velocity2().dot(nB))*(2);
 																				     
 																				     if(_p1)
 																				     {
 																				       info->jacobian.coeffRef(offset, _p1->variablesOffset() + RigidBody::PositionOffset) = (-nA[1]);
 																				       info->jacobian.coeffRef(offset, _p1->variablesOffset() + RigidBody::PositionOffset+1) = (-nA[0]);
 																				       
-																				       info->jacobianDerivative.coeffRef(offset, _p1->variablesOffset() + RigidBody::PositionOffset) =(v1[0]);
-																				       info->jacobianDerivative.coeffRef(offset, _p1->variablesOffset() + RigidBody::PositionOffset+1) =(v1[1]); 
+																				       info->jacobianDerivative.coeffRef(offset, _p1->variablesOffset() + RigidBody::PositionOffset) =(-v1[0]);
+																				       info->jacobianDerivative.coeffRef(offset, _p1->variablesOffset() + RigidBody::PositionOffset+1) =(-v1[1]); 
 																				     }
 																				         else if(_r1)
 																					 {
@@ -143,11 +134,12 @@ namespace StepCore {
 																					   Vector2d v1 = velocity1();
 																					   info->jacobian.coeffRef(offset, _r1->variablesOffset() + RigidBody::PositionOffset) = (-nA[0]);
 																					   info->jacobian.coeffRef(offset, _r1->variablesOffset() + RigidBody::PositionOffset+1) = (-nA[1]);
-																					   //info->jacobian.coeffRef(offset, _r1->variablesOffset() + RigidBody::AngleOffset) = (nA[0]*r1[1] - nA[1]*r1[0]);
+																					   info->jacobian.coeffRef(offset, _r1->variablesOffset() + RigidBody::AngleOffset) = (nA[0]*r1[1] - nA[1]*r1[0]);
 																					   
 																					   info->jacobianDerivative.coeffRef(offset, _r1->variablesOffset() + RigidBody::PositionOffset) =(-v1[0]);
 																					   info->jacobianDerivative.coeffRef(offset, _r1->variablesOffset() + RigidBody::PositionOffset+1) =(-v1[1]);
-																					   //info->jacobianDerivative.coeffRef(offset, _r1->variablesOffset() + RigidBody::AngleOffset) =  (nA[0]*r1[1] - nA[1]*r1[0]);
+																					   info->jacobianDerivative.coeffRef(offset, _r1->variablesOffset() + RigidBody::AngleOffset) =  
+																					                 (v1[0]*r1[1] - v1[1]*r1[0] + _r1->angularVelocity()*nA.dot(r1));
 																					   
 																					 }
 																					     
@@ -156,8 +148,8 @@ namespace StepCore {
 																						   info->jacobian.coeffRef(offset, _p2->variablesOffset() + Particle::PositionOffset) = (-nB[0]);
 																						   info->jacobian.coeffRef(offset, _p2->variablesOffset() + Particle::PositionOffset+1) = (-nB[1]);
 																						   
-																						   info->jacobianDerivative.coeffRef(offset, _p2->variablesOffset() + Particle::PositionOffset) = (v2[0]);
-																						   info->jacobianDerivative.coeffRef(offset, _p2->variablesOffset() + Particle::PositionOffset+1) =(v2[1]); 
+																						   info->jacobianDerivative.coeffRef(offset, _p2->variablesOffset() + Particle::PositionOffset) = (-v2[0]);
+																						   info->jacobianDerivative.coeffRef(offset, _p2->variablesOffset() + Particle::PositionOffset+1) =(-v2[1]); 
 																						 }
 																						     else if(_r2)
 																						     {
@@ -165,13 +157,13 @@ namespace StepCore {
 																						       Vector2d v2 = velocity2();
 																						       info->jacobian.coeffRef(offset, _r2->variablesOffset() + RigidBody::PositionOffset) = (-nB[0]);
 																						       info->jacobian.coeffRef(offset, _r2->variablesOffset() + RigidBody::PositionOffset+1) = (-nB[1]);
-																						       //info->jacobian.coeffRef(offset, _r2->variablesOffset() + RigidBody::AngleOffset) = (nB[0]*r2[1] - nB[1]*r2[0]);
+																						       info->jacobian.coeffRef(offset, _r2->variablesOffset() + RigidBody::AngleOffset) = (nB[0]*r2[1] - nB[1]*r2[0]);
 																						       
 																						       info->jacobianDerivative.coeffRef(offset, _r2->variablesOffset() + RigidBody::PositionOffset) =(-v2[0]);
 																						       info->jacobianDerivative.coeffRef(offset, _r2->variablesOffset() + RigidBody::PositionOffset+1) =(-v2[1]);
-																						       //info->jacobianDerivative.coeffRef(offset, _r2->variablesOffset() + RigidBody::AngleOffset) = 
-																						         //                                                                  (nB[0]*r2[1] - nB[1]*r2[0]);
-																															   
+																						       info->jacobianDerivative.coeffRef(offset, _r2->variablesOffset() + RigidBody::AngleOffset) = 
+																						       					(v2[0]*r2[1] - v2[1]*r2[0] + _r2->angularVelocity()*nB.dot(r2));
+																				   
 																						     }
 																				   }
 																				 }

@@ -91,7 +91,7 @@ void PulleyCordHandlerGraphicsItem::worldDataChanged(bool)
 void PulleyCordHandlerGraphicsItem::mouseSetPos(const QPointF& pos, const QPointF&, MovingState movingState)
 {
   static_cast<WorldScene*>(scene())->snapItem(parentItem()->mapToParent(pos),
-                                     WorldScene::SnapRigidBody | WorldScene::SnapSetPosition |
+                                     WorldScene::SnapRigidBody | WorldScene::SnapParticle | WorldScene::SnapSetPosition |
 				     WorldScene::SnapSetLocalPosition | WorldScene::SnapSetPosition,
 				     0, movingState, _item, _num);
 
