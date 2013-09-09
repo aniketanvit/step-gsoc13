@@ -29,17 +29,19 @@ STEPCORE_META_OBJECT(LinearMotor, QT_TRANSLATE_NOOP("ObjectClass", "LinearMotor"
     STEPCORE_SUPER_CLASS(Item) STEPCORE_SUPER_CLASS(Force),
     STEPCORE_PROPERTY_RW(Object*, body, QT_TRANSLATE_NOOP("PropertyName", "body"), STEPCORE_UNITS_NULL, QT_TR_NOOP("Body"), body, setBody)
     STEPCORE_PROPERTY_RW(StepCore::Vector2d, localPosition, QT_TRANSLATE_NOOP("PropertyName", "localPosition"), QT_TRANSLATE_NOOP("Units", "m"), QT_TR_NOOP("Position of the motor on a body"), localPosition, setLocalPosition)
-    STEPCORE_PROPERTY_RW(StepCore::Vector2d, forceValue, QT_TRANSLATE_NOOP("PropertyName", "forceValue"), QT_TRANSLATE_NOOP("Units", "N"), QT_TR_NOOP("Value of the force, acting on the body"), forceValue, setForceValue))
+    STEPCORE_PROPERTY_RW(StepCore::Vector2d, forceValue, QT_TRANSLATE_NOOP("PropertyName", "forceValue"), QT_TRANSLATE_NOOP("Units", "N"), QT_TR_NOOP("Value of the force, acting on the body"), forceValue, setForceValue)
+    STEPCORE_PROPERTY_RW(double, expiryTime, QT_TRANSLATE_NOOP("PropertyName", "expiryTime"), QT_TRANSLATE_NOOP("Units", "s"), QT_TR_NOOP("Time after which the force stops acting on the body"), expiryTime, setExpiryTime))
 
 STEPCORE_META_OBJECT(CircularMotor, QT_TRANSLATE_NOOP("ObjectClass", "CircularMotor"), QT_TR_NOOP("Circular motor: applies a constant torque to the body"), 0,
     STEPCORE_SUPER_CLASS(Item) STEPCORE_SUPER_CLASS(Force),
     STEPCORE_PROPERTY_RW(Object*, body, QT_TRANSLATE_NOOP("PropertyName", "body"), STEPCORE_UNITS_NULL, QT_TR_NOOP("Body"), body, setBody)
     STEPCORE_PROPERTY_RW(StepCore::Vector2d, localPosition, QT_TRANSLATE_NOOP("PropertyName", "localPosition"), QT_TRANSLATE_NOOP("Units", "m"), QT_TR_NOOP("Position of the motor on a body"), localPosition, setLocalPosition)
-    STEPCORE_PROPERTY_RW(double, torqueValue, QT_TRANSLATE_NOOP("PropertyName", "torqueValue"), QT_TRANSLATE_NOOP("Units", "N m"), QT_TR_NOOP("Value of the torque, acting on the body"), torqueValue, setTorqueValue))
+    STEPCORE_PROPERTY_RW(double, torqueValue, QT_TRANSLATE_NOOP("PropertyName", "torqueValue"), QT_TRANSLATE_NOOP("Units", "N m"), QT_TR_NOOP("Value of the torque, acting on the body"), torqueValue, setTorqueValue)
+    STEPCORE_PROPERTY_RW(double, expiryTime, QT_TRANSLATE_NOOP("PropertyName", "expiryTime"), QT_TRANSLATE_NOOP("Units", "s"), QT_TR_NOOP("Time after which the force stops acting on the body"), expiryTime, setExpiryTime))
 
 
-LinearMotor::LinearMotor(Object* body, const Vector2d& localPosition, Vector2d forceValue)
-    : _localPosition(localPosition), _forceValue(forceValue)
+LinearMotor::LinearMotor(Object* body, const Vector2d& localPosition, Vector2d forceValue, double expiryTime)
+    : _localPosition(localPosition), _forceValue(forceValue), _expiryTime(expiryTime)
 {
     setBody(body);
     setColor(0xff0000ff);
@@ -47,9 +49,12 @@ LinearMotor::LinearMotor(Object* body, const Vector2d& localPosition, Vector2d f
 
 void LinearMotor::calcForce(bool /*calcVariances*/)
 {
+  if(_expiryTime < 0 || world()->time() < _expiryTime){
      if(_p) _p->applyForce(_forceValue);
      else if(_r) _r->applyForce(_forceValue,
                         _r->pointLocalToWorld(_localPosition));
+  }
+  
         
 }
 
@@ -99,8 +104,8 @@ void LinearMotor::setWorld(World* world)
 */
 
 //////////////////////////////////////////////////////////////////////////
-CircularMotor::CircularMotor(Object* body, const Vector2d& localPosition, double torqueValue)
-    : _localPosition(localPosition), _torqueValue(torqueValue)
+CircularMotor::CircularMotor(Object* body, const Vector2d& localPosition, double torqueValue, double expiryTime)
+    : _localPosition(localPosition), _torqueValue(torqueValue), _expiryTime(expiryTime)
 {
     setBody(body);
     setColor(0xff0000ff);
@@ -108,7 +113,9 @@ CircularMotor::CircularMotor(Object* body, const Vector2d& localPosition, double
 
 void CircularMotor::calcForce(bool /*calcVariances*/)
 {
-     if(_r) _r->applyTorque(_torqueValue);        
+  if(_expiryTime < 0 || world()->time() < _expiryTime){
+     if(_r) _r->applyTorque(_torqueValue);
+  }
 }
 
 void CircularMotor::setBody(Object* body)

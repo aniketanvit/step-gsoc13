@@ -45,7 +45,7 @@ class LinearMotor: public Item, public Force
 public:
     /** Constructs LinearMotor */
     explicit LinearMotor(Object* body = 0, const Vector2d& localPosition = Vector2d::Zero(),
-                        Vector2d forceValue = Vector2d::Zero());
+                        Vector2d forceValue = Vector2d::Zero(), double expiryTime = -1);
 
     void calcForce(bool calcVariances);
 
@@ -68,7 +68,16 @@ public:
     const Vector2d& forceValue() const { return _forceValue; }
     /** Set force value */
     void setForceValue(const Vector2d& forceValue) { _forceValue = forceValue; }
+    
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////    
+    
+    /* Get the time after which the motor stops applying force */
+    double expiryTime() const { return _expiryTime; }
+    /* Set the time after which the motor stops applying force. If _expiryTime is (-)ve the motor never dies */
+    void setExpiryTime(const double time) { _expiryTime = time; }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
     //void worldItemRemoved(Item* item);
     //void setWorld(World* world);
         
@@ -76,6 +85,7 @@ protected:
     Object*  _body;
     Vector2d _localPosition;
     Vector2d _forceValue;
+    double _expiryTime;
 
     Particle*  _p;
     RigidBody* _r;
@@ -91,7 +101,7 @@ class CircularMotor: public Item, public Force
 public:
     /** Constructs CircularMotor */
     explicit CircularMotor(Object* body = 0, const Vector2d& localPosition = Vector2d::Zero(),
-                                            double torqueValue = 0);
+                                            double torqueValue = 0, double expiryTime = -1);
 
     void calcForce(bool calcVariances);
 
@@ -117,6 +127,15 @@ public:
     /** Set torque value */
     void setTorqueValue(const double torqueValue) { _torqueValue = torqueValue; }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////    
+    
+    /* Get the time after which the motor stops applying force */
+    double expiryTime() const { return _expiryTime; }
+    /* Set the time after which the motor stops applying force. If _expiryTime is (-)ve the motor never dies */
+    void setExpiryTime(const double time) { _expiryTime = time; }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
     //void worldItemRemoved(Item* item);
     //void setWorld(World* world);
         
@@ -124,6 +143,7 @@ protected:
     Object*  _body;
     Vector2d _localPosition;
     double   _torqueValue;
+    double _expiryTime;
 
     RigidBody* _r;
 };
