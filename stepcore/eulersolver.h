@@ -60,8 +60,7 @@ public:
     int doCalcFn(double* t, const VectorXd* y, const VectorXd* yvar = 0,
                         VectorXd* f = 0, VectorXd* fvar = 0);
     int doEvolve(double* t, double t1, VectorXd* y, VectorXd* yvar);
-    int doReverseEvolve(double* t, double t1, VectorXd* y, VectorXd* yvar);
-
+    
 protected:
     int doStep(double t, double stepSize, VectorXd* y, VectorXd* yvar);
     void init();

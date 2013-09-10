@@ -136,8 +136,7 @@ public:
      *  \todo Provide error message
      */
     virtual int doEvolve(double* t, double t1, VectorXd* y, VectorXd* yvar) = 0;
- 
-    virtual int doReverseEvolve(double* t, double t1, VectorXd* y, VectorXd* yvar) { return 0;}
+    
 public:
     /** Status codes for doCalcFn and doEvolve */
     enum { OK = 0,

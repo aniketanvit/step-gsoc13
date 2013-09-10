@@ -406,9 +406,9 @@ public:
     void clear();
 
     /** Get current time */
-    double time() const { return _time; }
+    double time() const { return _rtime; }
     /** Set current time */
-    void setTime(double t) { _time = t; }
+    void setTime(double t) { _rtime = t; }
 
     /** Get simulation speed scale */
     double timeScale() const { return _timeScale; }
@@ -538,6 +538,7 @@ private:
 
 private:
     double    _time;
+    double    _rtime;
     double    _timeScale;
     bool      _errorsCalculation;
 
@@ -550,7 +551,7 @@ private:
     CollisionSolver*  _collisionSolver;
     ConstraintSolver* _constraintSolver;
 
-    int             _variablesCount;  ///< \internal Count of positions (not including velocities)
+    int         _variablesCount;  ///< \internal Count of positions (not including velocities)
     VectorXd    _variables;       ///< \internal Positions and velocities (size == _variablesCount*2)
     VectorXd    _variances;       ///< \internal Variances of positions and velocities
     VectorXd    _tempArray;       ///< \internal Temporary array used in various places
@@ -559,7 +560,7 @@ private:
     bool    _stopOnCollision;
     bool    _stopOnIntersection;
     bool    _evolveAbort;
-    bool _backwardSimulation;
+    bool    _backwardSimulation;
 };
 
 } // namespace StepCore

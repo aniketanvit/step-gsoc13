@@ -264,7 +264,7 @@ void ConstraintsInfo::clear()
 World::World()
     : _time(0), _timeScale(1), _errorsCalculation(false),
       _solver(NULL), _collisionSolver(NULL), _constraintSolver(NULL),
-      _variablesCount(0)
+      _variablesCount(0), _backwardSimulation(false)
 {
     setColor(0xffffffff);
     setWorld(this);
@@ -274,7 +274,7 @@ World::World()
 World::World(const World& world)
     : ItemGroup(), _time(0), _timeScale(1), _errorsCalculation(false),
       _solver(NULL), _collisionSolver(NULL), _constraintSolver(NULL),
-      _variablesCount(0)
+      _variablesCount(0), _backwardSimulation(false)
 {
     *this = world;
 }
@@ -313,12 +313,14 @@ void World::clear()
     deleteObjectErrors();
 
     _time = 0;
+    _rtime = 0;
     _timeScale = 1;
     _errorsCalculation = false;
 
     _stopOnCollision = false;
     _stopOnIntersection = false;
     _evolveAbort = false;
+    _backwardSimulation = false;
 
 #ifdef STEPCORE_WITH_QT
     setName(QString());
@@ -708,11 +710,16 @@ void World::toggleSimulation()
       _r->setAngularVelocity(-preva);
     }
   }
-
-   std::cout<<"Toggle Simulation ";
-
   
+  _variables.setZero();
+  _variances.setZero();
+  _tempArray.setZero();
+
+  checkVariablesCount();
+  gatherVariables(_variables.data(), _errorsCalculation ? _variances.data() : NULL);  
+
 }
+
 int World::doCalcFn()
 {
     STEPCORE_ASSERT_NOABORT(_solver != NULL);
@@ -730,12 +737,11 @@ int World::doCalcFn()
 int World::doEvolve(double delta)
 {
     STEPCORE_ASSERT_NOABORT(_solver != NULL);
-    
+    _time = _rtime;
     checkVariablesCount();
     gatherVariables(_variables.data(), _errorsCalculation ? _variances.data() : NULL);
 
     int ret = Solver::OK;
-    if(_backwardSimulation) { _timeScale = -_timeScale; }
     double targetTime = _time + delta*_timeScale;
     
     if(_collisionSolver) {
@@ -743,103 +749,6 @@ int World::doEvolve(double delta)
         if(Contact::Intersected == _collisionSolver->checkContacts(_bodies))
             return Solver::IntersectionDetected;
     }
-if(_backwardSimulation) {
-  while(_time > targetTime) {
-    //STEPCORE_ASSERT_NOABORT( targetTime - _time > _solver->stepSize() / 1000 );
-    //if( !(   targetTime - _time > _solver->stepSize() / 1000 ) ) {
-      //qDebug("* %e %e %e", targetTime, _time, _solver->stepSize());
-    //}
-            double time = _time;
-	    
-	    _stopOnCollision = true;
-	    _stopOnIntersection = true;
-	    
-	    ret = _solver->doReverseEvolve(&time, targetTime, &_variables,
-				    _errorsCalculation ? &_variances : NULL);
-	    
-	    _time = time;
-	    
-	    if(ret == Solver::CollisionDetected ||
-	      ret == Solver::IntersectionDetected) {
-	      // If we have stopped on collision
-	      // 1. Decrease timestep to stop before collision
-	      // 2. Proceed with decresed timestep until
-	      //    - we have meet collision again: go to 1
-	      //    - we pass collision point: it means that we have come close enough
-	      //      to collision point and CollisionSolver have resolved collision
-	      // We can't simply change Solver::stepSize since adaptive solvers can
-	      // abuse our settings so we have to step manually
-	      //STEPCORE_ASSERT_NOABORT(_collisionTime <= targetTime);
-	      //STEPCORE_ASSERT_NOABORT(_collisionTime > _time);
-	      double stepSize = fmin(_solver->stepSize() / 2, _time - targetTime);
-	      double collisionEndTime = _time - targetTime > stepSize*3.01 ? _time - stepSize*3 : targetTime;
-	      
-	      _stopOnCollision = false;
-	      
-	      do {
-		double endTime = collisionEndTime - time > stepSize*1.01 ? time-stepSize : collisionEndTime;
-		
-		ret = _solver->doEvolve(&time, endTime, &_variables,
-					_errorsCalculation ? &_variances : NULL);
-		
-		_time = time;
-		
-		if(ret == Solver::IntersectionDetected || ret == Solver::CollisionDetected) {
-		  //STEPCORE_ASSERT_NOABORT(_collisionTime > _time);
-		  //STEPCORE_ASSERT_NOABORT(_collisionTime < _collisionExpectedTime);
-		  stepSize = fmin(stepSize/2, targetTime - _time);
-		  collisionEndTime = _time - targetTime > stepSize*3.01 ? _time - stepSize*3 : targetTime;
-		  
-		  //STEPCORE_ASSERT_NOABORT(_time + stepSize != _time);
-		  // XXX: what to do if stepSize becomes too small ?
-		  
-		} else if(ret == Solver::OK) {
-		  // We can be close to the collision point.
-		  //
-		  // Now we will calculate impulses required to fix collisions.
-		  // All joints should be taken into account, but since we are
-		  // calculating impulses we should "froze" the jacobian i.e.
-		  // ignore it derivative
-		  scatterVariables(_variables.data(), _errorsCalculation ? _variances.data() : NULL);
-		  
-		  // check and count contacts before the sparse matrix assembly
-		  int contactsCount = 0;
-		  int status = _collisionSolver->checkContacts(_bodies, true, &contactsCount);
-		  if (contactsCount!=_constraintsInfo.contactsCount)
-		  {
-		    _constraintsInfo.setDimension(_constraintsInfo.variablesCount,
-						  _constraintsInfo.constraintsCount,
-				    contactsCount);
-		  }
-		                      
-		                                          _tempArray.setZero();
-							  ::new (&_constraintsInfo.position) MappedVector(_variables.data(), _variablesCount);
-							  ::new (&_constraintsInfo.velocity) MappedVector(_variables.data()+_variablesCount, _variablesCount);
-							  ::new (&_constraintsInfo.acceleration) MappedVector(_tempArray.data(), _variablesCount);
-							  
-							  // start sparse matrix assembly
-							  gatherJointsInfo(&_constraintsInfo);
-							  _constraintsInfo.jacobianDerivative.setZero();
-							  
-							  if(status >= CollisionSolver::InternalError) { ret = status; goto out; }
-							                      
-							                                          _collisionSolver->getContactsInfo(_constraintsInfo, true);
-												  // end sparse matrix assembly
-												  
-												  if(_constraintsInfo.collisionFlag) {
-												    ret = _constraintSolver->solve(&_constraintsInfo);
-												    if(ret != Solver::OK) goto out;
-												    
-												    // XXX: variances
-												    _constraintsInfo.velocity += _constraintsInfo.inverseMass.asDiagonal() * _constraintsInfo.force;
-												  }
-		} else goto out;
-		
-	      } while(_time - stepSize/100 >= collisionEndTime); // XXX
-	      } else if(ret != Solver::OK) goto out;
-  }
-  
-} else {
 while(_time < targetTime) {
         STEPCORE_ASSERT_NOABORT( targetTime - _time > _solver->stepSize() / 1000 );
         if( !(   targetTime - _time > _solver->stepSize() / 1000 ) ) {
@@ -852,7 +761,7 @@ while(_time < targetTime) {
         
         ret = _solver->doEvolve(&time, targetTime, &_variables,
                             _errorsCalculation ? &_variances : NULL);
-        
+	if(_backwardSimulation) { _rtime += _time - time ; } else { _rtime += time - _time ; }
         _time = time;
 
         if(ret == Solver::CollisionDetected ||
@@ -878,6 +787,7 @@ while(_time < targetTime) {
                 ret = _solver->doEvolve(&time, endTime, &_variables,
                             _errorsCalculation ? &_variances : NULL);
                 
+		if(_backwardSimulation) { _rtime += _time - time ; } else { _rtime += time - _time ; }
                 _time = time;
 
                 if(ret == Solver::IntersectionDetected || ret == Solver::CollisionDetected) {
@@ -934,7 +844,6 @@ while(_time < targetTime) {
             } while(_time + stepSize/100 <= collisionEndTime); // XXX
         } else if(ret != Solver::OK) goto out;
     }
-}
 out:
     scatterVariables(_variables.data(), _errorsCalculation ? _variances.data() : NULL);
     return ret;
@@ -944,7 +853,7 @@ inline int World::solverFunction(double t, const double* y,
                     const double* yvar, double* f, double* fvar)
 {
     if(_evolveAbort) return Solver::Aborted;
-
+    if(_backwardSimulation) { _rtime += _time - t ; } else { _rtime += t - _time ; }
     _time = t;
     scatterVariables(y, yvar); // this will reset force
 
