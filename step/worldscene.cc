@@ -403,7 +403,7 @@ void WorldScene::worldDataChanged(bool dynamicOnly)
 	  * here
 	  * 
 	  */
-	 if(doFrameChange){
+	 if(doFrameChange && _worldModel->isSimulationActive()) {
 	 QModelIndex selectedItem = _worldModel->selectionModel()->currentIndex();
 	 WorldGraphicsItem* frameItem = graphicsFromItem(_worldModel->item(selectedItem));
 	 //QGraphicsItem* g = static_cast<QGraphicsItem*>(centerItem);
