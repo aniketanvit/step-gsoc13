@@ -42,8 +42,6 @@ STEPCORE_META_OBJECT(RigidBody, QT_TRANSLATE_NOOP("ObjectClass", "RigidBody"), Q
         STEPCORE_PROPERTY_R_D(double, torque, QT_TRANSLATE_NOOP("PropertyName", "torque"), QT_TRANSLATE_NOOP("Units", "N m"), QT_TR_NOOP("Torque that acts upon the body"), torque)
 
         STEPCORE_PROPERTY_RW(double, mass, QT_TRANSLATE_NOOP("PropertyName", "mass"), QT_TRANSLATE_NOOP("Units", "kg"), QT_TR_NOOP("Total mass of the body"), mass, setMass)
-	STEPCORE_PROPERTY_RW(double, charge, QT_TRANSLATE_NOOP("PropertyName", "charge"), QT_TRANSLATE_NOOP("Units", "C"), QT_TR_NOOP("Total charge on the body"), charge, setCharge)
-	STEPCORE_PROPERTY_RW(double, area, QT_TRANSLATE_NOOP("PropertyName", "area"), QT_TRANSLATE_NOOP("Units", "m²"), QT_TR_NOOP("Total area of the body"), area, setArea)
 	STEPCORE_PROPERTY_RW(double, inertia, QT_TRANSLATE_NOOP("PropertyName", "inertia"), STEPCORE_FROM_UTF8(QT_TRANSLATE_NOOP("Units", "kg m²")),
                                     QT_TR_NOOP("Inertia \"tensor\" of the body"), inertia, setInertia)
         STEPCORE_PROPERTY_RWF(StepCore::Vector2d, momentum, QT_TRANSLATE_NOOP("PropertyName", "momentum"), QT_TRANSLATE_NOOP("Units", "kg m/s"), QT_TR_NOOP("momentum"),
@@ -52,12 +50,8 @@ STEPCORE_META_OBJECT(RigidBody, QT_TRANSLATE_NOOP("ObjectClass", "RigidBody"), Q
                         StepCore::MetaProperty::DYNAMIC, angularMomentum, setAngularMomentum)
         STEPCORE_PROPERTY_RWF(double, kineticEnergy, QT_TRANSLATE_NOOP("PropertyName", "kineticEnergy"), QT_TRANSLATE_NOOP("Units", "J"), QT_TR_NOOP("kinetic energy"),
                         StepCore::MetaProperty::DYNAMIC, kineticEnergy, setKineticEnergy)
-	STEPCORE_PROPERTY_RW(double, massDensity, QT_TRANSLATE_NOOP("PropertyName", "massDensity"),
-								    STEPCORE_FROM_UTF8(QT_TRANSLATE_NOOP("Units", "kg/m²")), QT_TR_NOOP("Mass Density of the Rigid Body"),
-			     massDensity, setMassDensity)
-	STEPCORE_PROPERTY_RW(double, chargeDensity, QT_TRANSLATE_NOOP("PropertyName", "chargeDensity"),
-								    STEPCORE_FROM_UTF8(QT_TRANSLATE_NOOP("Units", "C/m²")), QT_TR_NOOP("Charge Density of the Rigid Body"),
-								    chargeDensity, setChargeDensity))
+	STEPCORE_PROPERTY_RW(double, massDensity, QT_TRANSLATE_NOOP("PropertyName", "massDensity"),STEPCORE_FROM_UTF8(QT_TRANSLATE_NOOP("Units", "kg/m²")), QT_TR_NOOP("Mass Density of the Rigid Body"),
+			     massDensity, setMassDensity))
 
 STEPCORE_META_OBJECT(RigidBodyErrors, QT_TRANSLATE_NOOP("ObjectClass", "RigidBodyErrors"), QT_TR_NOOP("Errors class for RigidBody"), 0, STEPCORE_SUPER_CLASS(ObjectErrors),
         STEPCORE_PROPERTY_RW_D(StepCore::Vector2d, positionVariance, QT_TRANSLATE_NOOP("PropertyName", "positionVariance"), QT_TRANSLATE_NOOP("Units", "m"),
@@ -80,8 +74,6 @@ STEPCORE_META_OBJECT(RigidBodyErrors, QT_TRANSLATE_NOOP("ObjectClass", "RigidBod
 
         STEPCORE_PROPERTY_RW(double, massVariance, QT_TRANSLATE_NOOP("PropertyName", "massVariance"), QT_TRANSLATE_NOOP("Units", "kg"),
                     QT_TR_NOOP("mass variance"), massVariance, setMassVariance )
-	//STEPCORE_PROPERTY_RWF(double, chargeVariance, QT_TRANSLATE_NOOP("PropertyName", "chargeVariance"), QT_TRANSLATE_NOOP("Units", "C"),
-	//	    QT_TR_NOOP("charge variance"), StepCore::MetaProperty::DYNAMIC, chargeVariance, setChargeVariance )
 	STEPCORE_PROPERTY_RW(double, inertiaVariance, QT_TRANSLATE_NOOP("PropertyName", "inertiaVariance"), STEPCORE_FROM_UTF8(QT_TRANSLATE_NOOP("Units", "kg m²")),
                     QT_TR_NOOP("inertia variance"), inertiaVariance, setInertiaVariance )
         STEPCORE_PROPERTY_RWF(StepCore::Vector2d, momentumVariance, QT_TRANSLATE_NOOP("PropertyName", "momentumVariance"), QT_TRANSLATE_NOOP("Units", "kg m/s"),
@@ -94,32 +86,23 @@ STEPCORE_META_OBJECT(RigidBodyErrors, QT_TRANSLATE_NOOP("ObjectClass", "RigidBod
 
 STEPCORE_META_OBJECT(Disk, QT_TRANSLATE_NOOP("ObjectClass", "Disk"), QT_TR_NOOP("Rigid disk"), 0, STEPCORE_SUPER_CLASS(RigidBody),
         STEPCORE_PROPERTY_RW(double, radius, QT_TRANSLATE_NOOP("PropertyName", "radius"), QT_TRANSLATE_NOOP("Units", "m"), QT_TR_NOOP("Radius of the disk"), radius, setRadius)
-	//STEPCORE_PROPERTY_R_D(double, charge, QT_TRANSLATE_NOOP("PropertyName", "charge"), QT_TRANSLATE_NOOP("Units", "C"), QT_TR_NOOP("Charge on the disk"), charge 
-	)
+	STEPCORE_PROPERTY_RW(double, area, QT_TRANSLATE_NOOP("PropertyName", "area"), QT_TRANSLATE_NOOP("Units", "m²"), QT_TR_NOOP("Total area of the body"), area, setArea))
 
 STEPCORE_META_OBJECT(BasePolygon, QT_TRANSLATE_NOOP("ObjectClass", "BasePolygon"), QT_TR_NOOP("Base polygon body"), 0, STEPCORE_SUPER_CLASS(RigidBody),)
 
 STEPCORE_META_OBJECT(Box, QT_TRANSLATE_NOOP("ObjectClass", "Box"), QT_TR_NOOP("Rigid box"), 0, STEPCORE_SUPER_CLASS(BasePolygon),
-        STEPCORE_PROPERTY_RW(StepCore::Vector2d, size, QT_TRANSLATE_NOOP("PropertyName", "size"), QT_TRANSLATE_NOOP("Units", "m"), QT_TR_NOOP("Size of the box"), size, setSize))
+        STEPCORE_PROPERTY_RW(StepCore::Vector2d, size, QT_TRANSLATE_NOOP("PropertyName", "size"), QT_TRANSLATE_NOOP("Units", "m"), QT_TR_NOOP("Size of the box"), size, setSize)
+	STEPCORE_PROPERTY_R_D(double, area, QT_TRANSLATE_NOOP("PropertyName", "area"), QT_TRANSLATE_NOOP("Units", "m²"), QT_TR_NOOP("Total area of the body"), area))
 
 STEPCORE_META_OBJECT(Polygon, QT_TRANSLATE_NOOP("ObjectClass", "Polygon"), QT_TR_NOOP("Rigid polygon body"), 0, STEPCORE_SUPER_CLASS(BasePolygon),
-        STEPCORE_PROPERTY_RW(Vector2dList, vertexes, QT_TRANSLATE_NOOP("PropertyName", "vertices"), QT_TRANSLATE_NOOP("Units", "m"), QT_TR_NOOP("Vertex list"), vertexes, setVertexes))
+        STEPCORE_PROPERTY_RW(Vector2dList, vertexes, QT_TRANSLATE_NOOP("PropertyName", "vertices"), QT_TRANSLATE_NOOP("Units", "m"), QT_TR_NOOP("Vertex list"), vertexes, setVertexes)
+	STEPCORE_PROPERTY_R_D(double, area, QT_TRANSLATE_NOOP("PropertyName", "area"), QT_TRANSLATE_NOOP("Units", "m²"), QT_TR_NOOP("Total area of the body"), area))
 
 #if 0
 STEPCORE_META_OBJECT(Plane, QT_TRANSLATE_NOOP("ObjectClass", "Plane"), QT_TR_NOOP("Unmovable rigid plane"), 0, STEPCORE_SUPER_CLASS(Item) STEPCORE_SUPER_CLASS(Body),
         STEPCORE_PROPERTY_RW_D(StepCore::Vector2d, point1, QT_TRANSLATE_NOOP("PropertyName", "point1"), QT_TRANSLATE_NOOP("Units", "m"), QT_TR_NOOP("First point which defines the plane"), point1, setPoint1),
         STEPCORE_PROPERTY_RW_D(StepCore::Vector2d, point2, QT_TRANSLATE_NOOP("PropertyName", "point2"), QT_TRANSLATE_NOOP("Units", "m"), QT_TR_NOOP("Second point which defines the plane"), point2, setPoint2))
 #endif
-
-void RigidBody::findCenterOfCharge()
-{
-  
-  /**
-   * 
-   * to be implemented correctly soon
-   * 
-   */return;
-}
 
 RigidBody* RigidBodyErrors::rigidBody() const
 {
@@ -184,13 +167,13 @@ void RigidBodyErrors::setKineticEnergyVariance(double kineticEnergyVariance)
     // XXX: change angularVelocity here as well
 }
 
-RigidBody::RigidBody(Vector2d position, double angle, double area,
-        Vector2d velocity, double angularVelocity, double mass, double inertia, double charge,
-        double massDensity, double chargeDensity)
-    : _position(position), _angle(angle), _area(area), _velocity(velocity), _angularVelocity(angularVelocity),
-      _force(Vector2d::Zero()), _torque(0), _mass(mass), _inertia(inertia), _charge(charge), 
-      _massDensity(massDensity), _chargeDensity(chargeDensity)
+RigidBody::RigidBody(Vector2d position, double angle,
+        Vector2d velocity, double angularVelocity, double inertia,
+        double massDensity)
+    : _position(position), _angle(angle), _velocity(velocity), _angularVelocity(angularVelocity),
+      _force(Vector2d::Zero()), _torque(0), _inertia(inertia)
 {
+  setMassDensity(massDensity);
 }
 
 void RigidBody::applyForce(const Vector2d& force, const Vector2d& position)
@@ -364,11 +347,11 @@ void RigidBody::setKineticEnergy(double kineticEnergy)
     }
 }
 
-Box::Box(Vector2d position, double angle, double area,
+Box::Box(Vector2d position, double angle,
               Vector2d velocity, double angularVelocity,
-              double mass, double inertia, double charge, double massDensity, 
-	 double chargeDensity, Vector2d size)
-    : BasePolygon(position, angle, area, velocity, angularVelocity, mass, inertia, charge, massDensity, chargeDensity)
+              double inertia, double massDensity, 
+	  Vector2d size)
+    : BasePolygon(position, angle, velocity, angularVelocity, inertia, massDensity)
 {
     _vertexes.resize(4);
     setSize(size);
@@ -382,6 +365,86 @@ void Box::setSize(const Vector2d& size)
     _vertexes[1] <<  s[0], -s[1];
     _vertexes[2] <<  s[0],  s[1];
     _vertexes[3] << -s[0],  s[1];
+    
+    _area = fabs(size[0]*size[1]);
+    _mass = _area*_massDensity;
+    _inertia = _mass * (size[0]*size[0] + size[1]*size[1]) / 12.0;
+}
+
+void Polygon::calcInertia()
+{
+    double area_i, area = 0;
+    double inertia = 0;
+    unsigned int i;
+    Vector2dList v = _vertexes;
+
+    if(v.size() > 2) {
+        if(v.size() > 2) {
+            for(i=0; i+1<v.size(); ++i) {
+                area_i = (v[i][0]*v[i+1][1] - v[i][1]*v[i+1][0]) / 2;
+                inertia += (v[i].squaredNorm() + v[i].dot(v[i+1]) + v[i+1].squaredNorm())*(area_i/6);
+                area += area_i;
+            }
+            area_i = (v[i][0]*v[0][1] - v[i][1]*v[0][0]) / 2;
+            inertia += (v[i].squaredNorm() + v[i].dot(v[0]) + v[0].squaredNorm())*(area_i/6);
+            area += area_i;
+        }
+    }
+
+    if(area == 0) { // all vertexes on one line
+        inertia = 0;
+        for(i=0; i+1<v.size(); ++i) {
+            area_i = (v[i+1] - v[i]).norm();
+            inertia += area_i*area_i*area_i / 12 + area_i * (v[i]+v[i+1]).squaredNorm() / 4;
+            area += area_i;
+        }
+
+        if(area == 0) inertia = 0; // all vertexes are at one point
+        else inertia /= area;
+    }
+    _inertia = fabs(inertia);
+    _area = fabs(area);
+    _mass = _area*_massDensity;
+}
+
+void Polygon::calcPosition()
+{
+  Vector2dList v = vertexes();
+  //Vector2d position = position();
+
+    Vector2d center(0, 0);
+    double area_i, area = 0;
+    unsigned int i;
+
+    if(v.size() == 1) center = v[0];
+    else {
+        if(v.size() > 2) {
+            for(i=0; i+1<v.size(); ++i) {
+                area_i = (v[i][0]*v[i+1][1] - v[i][1]*v[i+1][0]) / 2;
+                center += (v[i] + v[i+1]) * (area_i/3);
+                area += area_i;
+            }
+            area_i = (v[i][0]*v[0][1] - v[i][1]*v[0][0]) / 2;
+            center += (v[i] + v[0]) * (area_i/3);
+            area += area_i;
+        }
+
+        if(area == 0) { // all vertexes on one line
+            center.setZero();
+            for(i=0; i+1<v.size(); ++i) {
+                area_i = (v[i+1] - v[i]).norm();
+                center += (v[i] + v[i+1]) * (area_i/2);
+                area += area_i;
+            }
+        }
+
+        if(area == 0) center = v[0]; // all vertexes are at one point
+        else center /= area;
+    }
+
+    for(i=0; i<v.size(); ++i) v[i] -= center;
+    _position = (_position + center).eval();
+    _vertexes = v;
 }
 
 } // namespace StepCore

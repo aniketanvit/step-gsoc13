@@ -26,6 +26,7 @@
 #include "world.h"
 #include "vector.h"
 #include "object.h"
+#include "constants.h"
 
 namespace StepCore {
 
@@ -43,7 +44,7 @@ public:
     RigidBodyErrors(Item* owner = 0)
         : ObjectErrors(owner), _positionVariance(0,0), _angleVariance(0), _velocityVariance(0,0),
           _angularVelocityVariance(0), _forceVariance(0,0), _torqueVariance(0),
-          _massVariance(0), _inertiaVariance(0), _chargeVariance(0) {}
+          _massVariance(0), _inertiaVariance(0) {}
 
     /** Get owner as RigidBody */
     RigidBody* rigidBody() const;
@@ -121,9 +122,6 @@ public:
     double kineticEnergyVariance() const;
     /** Set kinetic energy variance (will modify velocity variance) */
     void setKineticEnergyVariance(double kineticEnergyVariance);
-
-    double chargeVariance() { return _chargeVariance; }
-    void setChargevariance(double chargeVar) { _chargeVariance = chargeVar ;}
     
 protected:
     Vector2d _positionVariance;
@@ -137,8 +135,6 @@ protected:
 
     double _massVariance;
     double _inertiaVariance;
-    
-    double _chargeVariance;
 
     friend class RigidBody;
 };
@@ -157,22 +153,20 @@ public:
     };
 
     /** Constructs RigidBody */
-    explicit RigidBody(Vector2d position = Vector2d::Zero(), double angle = 0, double area = 1,
+    explicit RigidBody(Vector2d position = Vector2d::Zero(), double angle = 0,
               Vector2d velocity = Vector2d::Zero(), double angularVelocity = 0,
-              double mass = 1, double inertia = 1, double charge = 0, double massDensity = 1, double chargeDensity = 0);
+              double inertia = 1, double massDensity = 1);
 
     /** Get position of the center of mass of the body  */
     const Vector2d& position() const { return _position; }
     /** Set position of the center of mass of the body */
-    void setPosition(const Vector2d& position) { _position = position; _centerOfCharge = position; } // XXX will be corrected later
+    void setPosition(const Vector2d& position) { _position = position; } // XXX will be corrected later
 
     /** Get angle of the body */
     double angle() const { return _angle; }
     /** Set angle of the body */
     void setAngle(double angle) { _angle = angle; }
-
-    double area() const { return _area; }
-    void setArea(const double area) { _area = area; setMass(_area*_massDensity) ; }
+    
     /** Get velocity of the center of mass of the body */
     const Vector2d& velocity() const { return _velocity; }
     /** Set velocity of the particle */
@@ -214,8 +208,13 @@ public:
     /** Get mass of the body */
     double mass() const { return _mass; }
     /** Set mass of the body */
-    void   setMass(double mass) { _mass = mass; _massDensity = _mass/_area; }
-
+    virtual void setMass(double mass) { _inertia = _inertia/_mass*mass; _mass = mass; _massDensity = _mass/_area; }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /** Get the mass-density ( uniform ) of the rigidbody item */    
+    double massDensity() const { return _massDensity; }
+    /** Set the mass-density ( uniform ) of the rigidBody item */
+    virtual void setMassDensity(const double massDensity) {  _inertia = _inertia/_mass*(_area*massDensity); _massDensity = massDensity; _mass = _area*_massDensity; }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////    
     /** Get inertia "tensor" of the body */
     double inertia() const { return _inertia; }
     /** Set inertia "tensor" of the body */
@@ -267,29 +266,13 @@ public:
     /** Get (and possibly create) RigidBodyErrors object */
     RigidBodyErrors* rigidBodyErrors() {
         return static_cast<RigidBodyErrors*>(objectErrors()); }
-        
-        
-    double massDensity() const { return _massDensity; }
-    void setMassDensity(const double massDensity) { _massDensity = massDensity; _mass = _area*_massDensity; }
     
-    double charge() const { return _charge; }
-    void setCharge(const double charge) { _charge = charge; _chargeDensity = _charge/_area; }
-    
-    double chargeDensity() const { return _chargeDensity; }
-    void setChargeDensity(const double chargeDensity)
-    {
-      _chargeDensity = chargeDensity;
-      _charge = _chargeDensity*_area;
-    }
-    void findCenterOfCharge();
-
 protected:
     ObjectErrors* createObjectErrors() { return new RigidBodyErrors(this); }
 
     Vector2d _position;
     double   _angle;
     double _area;
-    
     Vector2d _velocity;
     double   _angularVelocity;
 
@@ -299,11 +282,7 @@ protected:
     double _massDensity;
     double   _mass;
     double   _inertia;
-    
-    double _charge;
-    double _chargeDensity;
-    Vector2d _centerOfCharge;        //just like Center of mass but it is for charge
-                                     // will be found out after integration of the charge-distribution.
+
     friend class RigidBodyErrors;
 };
 
@@ -315,20 +294,42 @@ class Disk: public RigidBody
     STEPCORE_OBJECT(Disk)
 public:
     /** Constructs Disk */
-    explicit Disk(Vector2d position = Vector2d::Zero(), double angle = 0, double area = 1,
+    explicit Disk(Vector2d position = Vector2d::Zero(), double angle = 0,
               Vector2d velocity = Vector2d::Zero(), double angularVelocity = 0,
-              double mass = 1, double inertia = 1, double charge = 0, double massDensity = 1,
-	      double chargeDensity = 0, double radius = 0.5)
-        : RigidBody(position, angle, area, velocity, angularVelocity, mass, inertia, charge, massDensity, chargeDensity),
+              double inertia = 1, double massDensity = 1, double radius = 0.5)
+        : RigidBody(position, angle, velocity, angularVelocity, inertia, massDensity),
           _radius(radius) {}
 
     /** Get disk radius */
     double radius() const { return _radius; }
     /** Set disk radius */
-    void setRadius(double radius) { _radius = radius; setArea(3.14*_radius*_radius); }
-
+    void setRadius(double radius)
+    {
+      _radius = radius;
+      _area = (3.14*_radius*_radius);
+      _mass = _area * _massDensity;
+      double inertia = _mass * _radius*_radius/2.0;
+      setInertia(inertia);
+    }
+    /** Get the area of the rigidbody */
+    double area() const { return _area; }
+    /** Set the area of the rigidbody. It is kept virtual as changing the area will change the mass hence different 
+     * implementations for different classes */
+    void setArea(const double area)
+    {
+      std::cout<<sqrt(area/Constants::Pi)<<std::endl;
+      double radius = sqrt(area/Constants::Pi);
+      _radius = radius;
+      _area = (3.14*_radius*_radius);
+      _mass = _area * _massDensity;
+      double inertia = _mass * _radius*_radius/2.0;
+      setInertia(inertia);
+      
+    }
+    
 protected:
     double _radius;
+    //double _area;
 };
 
 /** \ingroup bodies
@@ -339,10 +340,10 @@ class BasePolygon: public RigidBody
     STEPCORE_OBJECT(BasePolygon)
 public:
     /** Constructs BasePolygon */
-    explicit BasePolygon(Vector2d position = Vector2d::Zero(), double angle = 0, double area = 1,
+    explicit BasePolygon(Vector2d position = Vector2d::Zero(), double angle = 0,
               Vector2d velocity = Vector2d::Zero(), double angularVelocity = 0,
-              double mass = 1, double inertia = 1, double charge = 0, double massDensity = 1, double chargeDensity = 0)
-        : RigidBody(position, angle, area, velocity, angularVelocity, mass, inertia, charge, massDensity, chargeDensity) {}
+              double inertia = 1,  double massDensity = 1)
+        : RigidBody(position, angle, velocity, angularVelocity, inertia, massDensity) {}
 
     /** Get vertex list (constant) */
     const Vector2dList& vertexes() const { return _vertexes; }
@@ -356,16 +357,19 @@ class Box: public BasePolygon
     STEPCORE_OBJECT(Box)
 public:
     /** Constructs Box */
-    explicit Box(Vector2d position = Vector2d::Zero(), double angle = 0, double area =1,
+    explicit Box(Vector2d position = Vector2d::Zero(), double angle = 0,
               Vector2d velocity = Vector2d::Zero(), double angularVelocity = 0,
-              double mass = 1, double inertia = 1, double charge = 0, 
-	      double massDensity =1, double chargeDensity = 0, Vector2d size = Vector2d(1,1));
+              double inertia = 1, 
+	      double massDensity =1, Vector2d size = Vector2d(1,1));
 
     /** Get box size */
     Vector2d size() const { return Vector2d(_vertexes[1][0] - _vertexes[0][0],
                                             _vertexes[3][1] - _vertexes[0][1]); }
     /** Set box size */
     void setSize(const Vector2d& size);
+    double area() const { return _area; }
+protected:
+  //double _area;
 };
 
 /** \ingroup bodies
@@ -381,7 +385,16 @@ public:
     /** Get vertex list (editable) */
     Vector2dList& vertexes() { return _vertexes; }
     /** Set vertex list */
-    void setVertexes(const Vector2dList& vertexes) { _vertexes = vertexes; }
+    void setVertexes(const Vector2dList& vertexes) { _vertexes = vertexes; calcInertia(); 
+      calcPosition();
+      
+    }
+    
+    double area() const { return _area; }
+protected:
+  //double _area;
+  void calcInertia();
+  void calcPosition();
 };
 
 #if 0

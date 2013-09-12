@@ -193,19 +193,20 @@ bool DiskCreator::sceneEvent(QEvent* event)
         StepCore::Disk* disk = static_cast<StepCore::Disk*>(_item);
         double radius = (pos - disk->position()).norm();
         if(radius == 0) radius = 0.5;
-	/*
-	 * show the dialog here
-	 */
 	
-	RigidBodyMenuHandler* menuHandler = new RigidBodyMenuHandler(_item, _worldModel, NULL);
-	menuHandler->setupDialog();
-	menuHandler->deleteLater();
+	/////show the dialog here 
 	
-        double inertia = disk->mass() * radius*radius/2.0;
-	double area = 3.14*radius*radius;
+	//RigidBodyMenuHandler* menuHandler = new RigidBodyMenuHandler(_item, _worldModel, NULL);
+	//menuHandler->setupDialog();
+	//menuHandler->deleteLater();
+	//////////////////////
+	_worldModel->setProperty(_item, "massDensity", QVariant::fromValue(1));
+        
+	double area = (3.14*radius*radius);
         _worldModel->setProperty(_item, "radius", QVariant::fromValue(radius));
-	_worldModel->setProperty(_item, "area", QVariant::fromValue(area));
-        _worldModel->setProperty(_item, "inertia", QVariant::fromValue(inertia));
+	//_worldModel->setProperty(_item, "area", QVariant::fromValue(area));
+	//double inertia = disk->mass() * radius*radius/2.0;
+        //_worldModel->setProperty(_item, "inertia", QVariant::fromValue(inertia));
         _worldModel->endMacro();
 
         showMessage(MessageFrame::Information,
@@ -281,7 +282,7 @@ OnHoverHandlerGraphicsItem* DiskGraphicsItem::createOnHoverHandler(const QPointF
 
     return 0;
 }
-
+/*
 class RigidBodyKDialog : public KDialog
 {
 public:
@@ -344,12 +345,11 @@ inline StepCore::RigidBody* RigidBodyMenuHandler::rigidBody() const
 bool RigidBodyMenuHandler::createRigidBodyApply()
 {
   rigidBody()->setMassDensity(_createRigidBodyUi->_massLineEdit->text().toDouble());
-  rigidBody()->setChargeDensity(_createRigidBodyUi->_chargeLineEdit->text().toDouble());
   return true;
 
 }
 
-
+*/
 /////////////////////////////////////////////////////////////////////////////////////////
 
 void BoxCreator::start()
@@ -400,15 +400,17 @@ bool BoxCreator::sceneEvent(QEvent* event)
         StepCore::Vector2d position = (_topLeft + pos) / 2.0;
         StepCore::Vector2d size = _topLeft - pos;
         if(size[0] == 0 && size[1] == 0) { size[0] = size[1] = 1; }
-        double inertia = box->mass() * (size[0]*size[0] + size[1]*size[1]) / 12.0;
         _worldModel->setProperty(_item, "position", QVariant::fromValue(position));
         _worldModel->setProperty(_item, "size", QVariant::fromValue(size));
+        _worldModel->setProperty(_item, "area", QVariant::fromValue(fabs(size[0]*size[1])));
+       
+        double inertia = box->mass() * (size[0]*size[0] + size[1]*size[1]) / 12.0;
         _worldModel->setProperty(_item, "inertia", QVariant::fromValue(inertia));
 	
-	RigidBodyMenuHandler* menuHandler = new RigidBodyMenuHandler(_item, _worldModel, NULL);
-	menuHandler->setupDialog();
-	menuHandler->deleteLater();
-	
+	//RigidBodyMenuHandler* menuHandler = new RigidBodyMenuHandler(_item, _worldModel, NULL);
+	//menuHandler->setupDialog();
+	//menuHandler->deleteLater();
+	_worldModel->setProperty(_item, "massDensity", QVariant::fromValue(1));
         _worldModel->endMacro();
 
         showMessage(MessageFrame::Information,
@@ -497,7 +499,7 @@ void PolygonCreator::fixInertia()
         if(area == 0) inertia = 0; // all vertexes are at one point
         else inertia /= area;
     }
-
+    area = fabs(area);
     inertia = fabs(inertia * mass); // 1 = 1m XXX XXX XXX
     _worldModel->setProperty(_item, "inertia", QVariant::fromValue(inertia));
     _worldModel->setProperty(_item, "area", QVariant::fromValue(area));
@@ -564,14 +566,13 @@ bool PolygonCreator::sceneEvent(QEvent* event)
 
     } else if(_item && event->type() == QEvent::KeyPress &&
                 static_cast<QKeyEvent*>(event)->key() == Qt::Key_Return) {
-        fixCenterOfMass();
-        fixInertia();
-    
-    
-    RigidBodyMenuHandler* menuHandler = new RigidBodyMenuHandler(_item, _worldModel, NULL);
-    menuHandler->setupDialog();
-    menuHandler->deleteLater();
-    
+  
+    //RigidBodyMenuHandler* menuHandler = new RigidBodyMenuHandler(_item, _worldModel, NULL);
+    //menuHandler->setupDialog();
+    //menuHandler->deleteLater();
+    _worldModel->setProperty(_item, "massDensity", QVariant::fromValue(1));
+    fixCenterOfMass();
+    fixInertia();
         _worldModel->endMacro();
 
         showMessage(MessageFrame::Information,
@@ -651,12 +652,14 @@ void BoxVertexHandlerGraphicsItem::setValue(const StepCore::Vector2d& value)
         }
         _worldModel->setProperty(_item, "position", QVariant::fromValue(newPos));
         _worldModel->setProperty(_item, "size", QVariant::fromValue(newSize));
+	_worldModel->setProperty(_item, "area", QVariant::fromValue(fabs(newSize[0]*newSize[1])));
         setValue(value);
         return;
     }
 
     _worldModel->setProperty(_item, "position", QVariant::fromValue(newPos));
     _worldModel->setProperty(_item, "size", QVariant::fromValue(newSize));
+    _worldModel->setProperty(_item, "area", QVariant::fromValue(fabs(newSize[0]*newSize[1])));
 #if 0
     StepCore::Vector2d delta = box()->vectorWorldToLocal(value) - box()->vertexes()[_vertexNum];
     StepCore::Vector2d newPos = box()->position() + box()->vectorLocalToWorld(delta/2.0);

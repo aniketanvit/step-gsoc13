@@ -15,7 +15,7 @@
    along with Step; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-#include "ui_create_rigidbody_items.h"
+//#include "ui_create_rigidbody_items.h"
 #ifndef STEP_POLYGONGRAPHICS_H
 #define STEP_POLYGONGRAPHICS_H
 
@@ -94,7 +94,7 @@ protected:
     OnHoverHandlerGraphicsItem* createOnHoverHandler(const QPointF& pos);
     StepCore::Disk* disk() const;
 };
-
+/*
 class Ui::WidgetCreateRigidBodyItems;
 
 class RigidBodyKDialog;
@@ -120,7 +120,7 @@ protected:
   friend class RigidBodyKDialog;
   
 };
-
+*/
 /////////////////////////////////////////////////////////////////////////////////////////
 
 class BasePolygonGraphicsItem: public RigidBodyGraphicsItem
