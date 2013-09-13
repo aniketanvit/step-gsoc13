@@ -84,7 +84,7 @@ protected:
   double _lengthOfCord;
   
   double _tension;
-  bool _inTension;
+  //bool _inTension;
   
   Vector2d _localPosition1;
   Vector2d _localPosition2;

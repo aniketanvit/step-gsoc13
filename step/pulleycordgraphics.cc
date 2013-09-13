@@ -10,6 +10,7 @@
 #include <QItemSelectionModel>
 #include <KLocale> 
 #include <QDebug>
+
 bool PulleyCordCreator::sceneEvent(QEvent* event)
 {
   QGraphicsSceneMouseEvent* mouseEvent = static_cast<QGraphicsSceneMouseEvent*>(event); 
@@ -119,9 +120,8 @@ QPainterPath PulleyCordGraphicsItem::shape() const
 
 void PulleyCordGraphicsItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
 {
-  painter->setPen(QPen(Qt::magenta));
-  QColor color(Qt::blue);
-  painter->setBrush(QBrush(color));
+  painter->setPen(QPen(QColor::fromRgba(pulleyCord()->color()), 0));
+  painter->setBrush(QColor::fromRgba(pulleyCord()->color()));
   painter->drawPath(_painterPath);
   
   if(isSelected()) {
@@ -142,14 +142,8 @@ void PulleyCordGraphicsItem::worldDataChanged(bool dynamicOnly)
 
 void PulleyCordGraphicsItem::stateChanged()
 {
-  if(_isSelected) {
   _handler1->setVisible(true);
   _handler2->setVisible(true);
-}
-else {
-  _handler1->setVisible(true);
-  _handler2->setVisible(true);
-}
   
   viewScaleChanged();
   update();
