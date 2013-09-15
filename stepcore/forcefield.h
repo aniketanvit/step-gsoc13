@@ -22,8 +22,11 @@ class ForceField : public Item, public Force
 {
   STEPCORE_OBJECT(ForceField)
 public:
-  ForceField() {}
+  explicit ForceField(double b = 1): _b(b)  {}
   ~ForceField() {}
+  
+  double b() const { return _b ; }
+  void setB(const double b) { _b = b ; }
   
   void calcForce(bool calcVariances);
   
@@ -36,6 +39,8 @@ protected:
   {
     return new ForceFieldErrors(this);
   }
+  
+  double _b;
   
 };
 

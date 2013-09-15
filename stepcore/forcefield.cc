@@ -9,7 +9,10 @@ STEPCORE_META_OBJECT(ForceFieldErrors, QT_TRANSLATE_NOOP("ObjectClass", ForceFie
 		     STEPCORE_SUPER_CLASS(ObjectErrors),)
   
 STEPCORE_META_OBJECT(ForceField, QT_TRANSLATE_NOOP("ObjectClass", ForceField), QT_TR_NOOP("Force Force"), 0, STEPCORE_SUPER_CLASS(Item) 
-STEPCORE_SUPER_CLASS(Force), )
+STEPCORE_SUPER_CLASS(Force),
+  STEPCORE_PROPERTY_RW(double, b, QT_TRANSLATE_NOOP("PropertyName", "b"), STEPCORE_FROM_UTF8(QT_TRANSLATE_NOOP("Units", "Wb")), QT_TR_NOOP("Constant"),
+                            b, setB)
+)
 
 
 ForceField* ForceFieldErrors::forceField() const
@@ -24,11 +27,13 @@ void ForceField::calcForce(bool calcVariances)
     if(!(*b1)->metaObject()->inherits<ChargedParticle>()) continue;
     else {
       ChargedParticle* p1 = static_cast<ChargedParticle*>(*b1);
-      p1->applyForce(Vector2d(p1->charge()*p1->position()[1], p1->charge()*p1->position()[1]));
+      Vector2d v = p1->velocity();
+      double q = p1->charge();
+      p1->applyForce(Vector2d(q*_b*v[1], -q*_b*v[0]));
     
     if(calcVariances) {
-      ChargedParticleErrors* pe1 = p1->chargedParticleErrors();
-      pe1->applyForceVariance(Vector2d(pe1->positionVariance()[1], pe1->positionVariance()[1]));
+      //ChargedParticleErrors* pe1 = p1->chargedParticleErrors();
+      //pe1->applyForceVariance(Vector2d(pe1->positionVariance()[1], pe1->positionVariance()[1]));
     }
     }
 }
