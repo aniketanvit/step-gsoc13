@@ -32,8 +32,7 @@ set(step_UIS
     configure_graph.ui
     configure_meter.ui
     configure_controller.ui
-    configure_step_general.ui
-    )
+    configure_step_general.ui)
 
 set(step_KCFGS
     settings.kcfgc)
