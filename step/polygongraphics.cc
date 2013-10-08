@@ -15,10 +15,8 @@
    along with Step; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-#include "ui_create_rigidbody_items.h"
 
 #include "polygongraphics.h"
-#include "polygongraphics.moc"
 
 #include <stepcore/rigidbody.h>
 
@@ -33,7 +31,6 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QKeyEvent>
 #include <QPainter>
-#include <KDialog>
 #include <KLocale>
 #include <KDebug>
 
@@ -282,75 +279,6 @@ OnHoverHandlerGraphicsItem* DiskGraphicsItem::createOnHoverHandler(const QPointF
 
     return 0;
 }
-/*
-class RigidBodyKDialog : public KDialog
-{
-public:
-  RigidBodyKDialog(RigidBodyMenuHandler* handler, QWidget *parent=0, Qt::WFlags flags=0)
-  : KDialog(parent, flags), _handler(handler) {}
-  
-protected slots:
-  void slotButtonClicked(int button) {
-    if(button == KDialog::Ok) {
-      if(_handler->createRigidBodyApply()) accept();
-    } else {
-      KDialog::slotButtonClicked(button);
-    }
-  }
-      RigidBodyMenuHandler* _handler;
-};
-
-void RigidBodyMenuHandler::populateMenu(QMenu* menu, KActionCollection* actions)
-{
-  _createRigidBodyUi = 0;
-  _createRigidBodyDialog = 0;
-    
-  menu->addAction(KIcon("step_object_Disk"), i18n("Create Disk..."), this, SLOT(cr()));
-  menu->addSeparator();
-  ItemMenuHandler::populateMenu(menu, actions);
-
-}
-
-void RigidBodyMenuHandler::setupDialog()
-{
-  if(_worldModel->isSimulationActive())
-    _worldModel->simulationStop();
-  
-  _createRigidBodyDialog = new RigidBodyKDialog(this); // XXX: parent?
-  
-  _createRigidBodyDialog->setCaption(i18n("Create RigidBody"));
-  _createRigidBodyDialog->setButtons(KDialog::Ok | KDialog::Cancel);
-  
-  _createRigidBodyUi= new Ui::WidgetCreateRigidBodyItems;
-  _createRigidBodyUi->setupUi(_createRigidBodyDialog);
-  
-  _createRigidBodyUi->_massLineEdit->setValidator(
-    new QDoubleValidator(0, HUGE_VAL, DBL_DIG, _createRigidBodyUi->_massLineEdit));
-  _createRigidBodyUi->_chargeLineEdit->setValidator(
-    new QDoubleValidator(0, HUGE_VAL, DBL_DIG, _createRigidBodyUi->_chargeLineEdit));
-    
-    connect(_createRigidBodyDialog, SIGNAL(okClicked()), this, SLOT(createRigidBodyApply()));
-    
-    _createRigidBodyDialog->exec();
-    
-    delete _createRigidBodyDialog; _createRigidBodyDialog = 0;
-    delete _createRigidBodyUi; _createRigidBodyUi = 0;
-}
-
-inline StepCore::RigidBody* RigidBodyMenuHandler::rigidBody() const
-{
-  return static_cast<StepCore::RigidBody*>(_object); 
-}
-
-bool RigidBodyMenuHandler::createRigidBodyApply()
-{
-  rigidBody()->setMassDensity(_createRigidBodyUi->_massLineEdit->text().toDouble());
-  return true;
-
-}
-
-*/
-/////////////////////////////////////////////////////////////////////////////////////////
 
 void BoxCreator::start()
 {

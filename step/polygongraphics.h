@@ -94,34 +94,6 @@ protected:
     OnHoverHandlerGraphicsItem* createOnHoverHandler(const QPointF& pos);
     StepCore::Disk* disk() const;
 };
-/*
-class Ui::WidgetCreateRigidBodyItems;
-
-class RigidBodyKDialog;
-class RigidBodyMenuHandler : public ItemMenuHandler
-{
-  Q_OBJECT
-  
-public:
-  RigidBodyMenuHandler(StepCore::Object* object, WorldModel* worldModel, QObject* parent = 0) :
-            ItemMenuHandler(object, worldModel, parent){}
-            
-  void populateMenu(QMenu* menu, KActionCollection* actions);
-  
-public slots:
-  void setupDialog();
-protected slots:
-  bool createRigidBodyApply();
-protected:
-  StepCore::RigidBody* rigidBody() const;
-  Ui::WidgetCreateRigidBodyItems*    _createRigidBodyUi;
-  RigidBodyKDialog*                  _createRigidBodyDialog;
-  
-  friend class RigidBodyKDialog;
-  
-};
-*/
-/////////////////////////////////////////////////////////////////////////////////////////
 
 class BasePolygonGraphicsItem: public RigidBodyGraphicsItem
 {
