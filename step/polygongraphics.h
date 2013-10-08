@@ -105,8 +105,6 @@ protected:
     StepCore::BasePolygon* basePolygon() const;
 };
 
-/////////////////////////////////////////////////////////////////////////////////////////
-
 class BoxCreator: public ItemCreator
 {
 public:
@@ -146,8 +144,6 @@ public:
 protected:
     OnHoverHandlerGraphicsItem* createOnHoverHandler(const QPointF& pos);
 };
-
-/////////////////////////////////////////////////////////////////////////////////////////
 
 class PolygonCreator: public ItemCreator
 {
