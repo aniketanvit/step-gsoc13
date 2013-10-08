@@ -20,6 +20,8 @@
 #include "solver.h"
 #include "collisionsolver.h"
 #include "constraintsolver.h"
+#include "particle.h"
+#include "rigidbody.h"
 #include <algorithm>
 #include <cmath>
 #include <QtGlobal>
