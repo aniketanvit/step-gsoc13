@@ -190,15 +190,7 @@ bool DiskCreator::sceneEvent(QEvent* event)
         StepCore::Disk* disk = static_cast<StepCore::Disk*>(_item);
         double radius = (pos - disk->position()).norm();
         if(radius == 0) radius = 0.5;
-	
-	/////show the dialog here 
-	
-	//RigidBodyMenuHandler* menuHandler = new RigidBodyMenuHandler(_item, _worldModel, NULL);
-	//menuHandler->setupDialog();
-	//menuHandler->deleteLater();
-	//////////////////////
 	_worldModel->setProperty(_item, "massDensity", QVariant::fromValue(1));
-        
 	double area = (3.14*radius*radius);
         _worldModel->setProperty(_item, "radius", QVariant::fromValue(radius));
 	//_worldModel->setProperty(_item, "area", QVariant::fromValue(area));
@@ -334,11 +326,7 @@ bool BoxCreator::sceneEvent(QEvent* event)
        
         double inertia = box->mass() * (size[0]*size[0] + size[1]*size[1]) / 12.0;
         _worldModel->setProperty(_item, "inertia", QVariant::fromValue(inertia));
-	
-	//RigidBodyMenuHandler* menuHandler = new RigidBodyMenuHandler(_item, _worldModel, NULL);
-	//menuHandler->setupDialog();
-	//menuHandler->deleteLater();
-	_worldModel->setProperty(_item, "massDensity", QVariant::fromValue(1));
+        _worldModel->setProperty(_item, "massDensity", QVariant::fromValue(1));
         _worldModel->endMacro();
 
         showMessage(MessageFrame::Information,
@@ -494,10 +482,6 @@ bool PolygonCreator::sceneEvent(QEvent* event)
 
     } else if(_item && event->type() == QEvent::KeyPress &&
                 static_cast<QKeyEvent*>(event)->key() == Qt::Key_Return) {
-  
-    //RigidBodyMenuHandler* menuHandler = new RigidBodyMenuHandler(_item, _worldModel, NULL);
-    //menuHandler->setupDialog();
-    //menuHandler->deleteLater();
     _worldModel->setProperty(_item, "massDensity", QVariant::fromValue(1));
     fixCenterOfMass();
     fixInertia();
