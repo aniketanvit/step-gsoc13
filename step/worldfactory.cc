@@ -186,7 +186,6 @@ WorldFactory::WorldFactory()
     __ADD_TO_PALETTE(Polygon);
     __ADD_SEPARATOR;
 
-    __ADD_TO_PALETTE(PulleyCord);
     __ADD_TO_PALETTE(Spring);
     __ADD_TO_PALETTE(LinearMotor);
     __ADD_TO_PALETTE(CircularMotor);
@@ -204,6 +203,7 @@ WorldFactory::WorldFactory()
     __ADD_TO_PALETTE(Anchor);
     __ADD_TO_PALETTE(Pin);
     __ADD_TO_PALETTE(Stick);
+    __ADD_TO_PALETTE(PulleyCord);
     //__ADD_TO_PALETTE(Rope);
     __ADD_SEPARATOR;
 
