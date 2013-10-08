@@ -46,7 +46,7 @@ int CGConstraintSolver::solve(ConstraintsInfo* info)
     x.setZero();
 
     a = info->jacobian * (info->inverseMass.asDiagonal() * info->jacobian.transpose());
-    //b = -(info->jacobian * info->velocity);
+    b = -(info->jacobian * info->velocity);
     b = info->jacobian * info->acceleration;
     b += info->jacobianDerivative * info->velocity;
     b = - (b + info->value + info->derivative);
@@ -54,7 +54,7 @@ int CGConstraintSolver::solve(ConstraintsInfo* info)
     IterationController iter(2.0E-5); // XXX
 
     // print debug info
-    std::cout << "ConstraintSolver:" << std::endl
+    /*std::cout << "ConstraintSolver:" << std::endl
               << "J=" << info->jacobian << std::endl
               << "J'=" << info->jacobianDerivative << std::endl
               << "C=" << info->value << std::endl
@@ -65,7 +65,7 @@ int CGConstraintSolver::solve(ConstraintsInfo* info)
               << "acc=" << info->acceleration << std::endl
               << "a=" << a << std::endl
               << "b=" << b << std::endl
-              << "force=" << info->force << std::endl;
+              << "force=" << info->force << std::endl;*/
 
     // constrained_cg ?
     // XXX: limit iterations count
@@ -100,7 +100,7 @@ int CGConstraintSolver::solve(ConstraintsInfo* info)
     info->force = info->jacobian.transpose() * x;
 
     // print debug info
-    std::cout << "Solved:" << std::endl
+    /*std::cout << "Solved:" << std::endl
               << "J=" << info->jacobian << std::endl
               << "J'=" << info->jacobianDerivative << std::endl
               << "C=" << info->value << std::endl
@@ -111,7 +111,7 @@ int CGConstraintSolver::solve(ConstraintsInfo* info)
               << "acc=" << info->acceleration << std::endl
               << "a=" << a << std::endl
               << "b=" << b << std::endl
-              << "force=" << info->force<< std::endl;
+              << "force=" << info->force<< std::endl;*/
     return 0;
 }
 

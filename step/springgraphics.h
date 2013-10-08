@@ -49,7 +49,7 @@ public:
     SpringGraphicsItem(StepCore::Item* item, WorldModel* worldModel);
 
     QPainterPath shape() const;
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget);
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
     void viewScaleChanged();
     void stateChanged();
