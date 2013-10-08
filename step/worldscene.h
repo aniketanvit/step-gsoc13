@@ -185,8 +185,7 @@ protected:
     QPointF            _snapPos;
     QString            _snapToolTip;
     QTimer*            _snapTimer;
-    
-    double _angle;
+  
 public:
     bool doFrameChange;
 

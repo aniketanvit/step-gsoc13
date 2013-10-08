@@ -174,7 +174,7 @@ void MainWindow::setupActions()
     /* Edit menu */
     testAction = actionCollection()->add<KAction>("test_action", this, SLOT(testSlot()));
     testAction->setEnabled(true);
-    testAction->setIconText(i18n("Toggle Frame"));
+    testAction->setIconText(i18n("Change Frame"));
     actionRedo = KStandardAction::redo(worldModel->undoStack(), SLOT(redo()), actionCollection());
     actionUndo = KStandardAction::undo(worldModel->undoStack(), SLOT(undo()), actionCollection());
     actionRedo->setEnabled(false); actionUndo->setEnabled(false);
@@ -275,7 +275,6 @@ void MainWindow::setupActions()
 
 void MainWindow::testSlot()
 {
-  qDebug()<<"testing...."<<endl; 
   if(worldScene->doFrameChange == true)
     worldScene->doFrameChange = false;
   else
@@ -301,7 +300,7 @@ bool MainWindow::queryClose()
 }
 
 bool MainWindow::newFile()
-{std::cout<<"new file"<<std::endl;
+{
     if(worldModel->isSimulationActive()) simulationStop();
     if(!maybeSave()) return false;
 

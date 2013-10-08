@@ -61,7 +61,7 @@ public slots:
     void uploadExample();
     void downloadExamples();
 
-   void configureStep();
+    void configureStep();
 
     void simulationStartStop();
     void simulationStart();
