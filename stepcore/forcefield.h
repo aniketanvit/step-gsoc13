@@ -16,6 +16,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+/** \file forcefield.h
+ *  \brief Attempt to add a magnetic-field like force (which acts only on moving charged particles)
+ */
+
 #ifndef FORCEFIELD_H
 #define FORCEFIELD_H
 
@@ -35,6 +39,10 @@ public:
   ForceField* forceField() const;
   friend class ForceField;
 };
+
+/** \ingroup forces
+ *  \brief  Magnetic-field like force which will act only on moving charged particles. 
+ */
 
 class ForceField : public Item, public Force 
 {
