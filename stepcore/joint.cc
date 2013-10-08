@@ -110,11 +110,6 @@ void Anchor::getConstraintsInfo(ConstraintsInfo* info, int offset)
         info->jacobian.coeffRef(offset, _r->variablesOffset()+RigidBody::PositionOffset) = 1;
         info->jacobian.coeffRef(offset+1, _r->variablesOffset()+RigidBody::PositionOffset+1) = 1;
         info->jacobian.coeffRef(offset+2, _r->variablesOffset()+RigidBody::AngleOffset) = 1;
-	/*
-	info->jacobianDerivative.coeffRef(offset, _r->variablesOffset()+RigidBody::PositionOffset) = _r->velocity()[1];
-	info->jacobianDerivative.coeffRef(offset+1, _r->variablesOffset()+RigidBody::PositionOffset+1) = _r->velocity()[0];
-	info->jacobianDerivative.coeffRef(offset+2, _r->variablesOffset()+RigidBody::AngleOffset) = _r->angularVelocity();
-	*/
     }
 }
 
