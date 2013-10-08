@@ -24,6 +24,7 @@
 #include "object.h"
 #include "vector.h"
 #include <QtGlobal>
+
 namespace StepCore {
 
   STEPCORE_META_OBJECT(PulleyCord, QT_TRANSLATE_NOOP("ObjectClass", "PulleyCord"), QT_TR_NOOP("Massless Pulley with a cord"), 0, 
@@ -56,6 +57,7 @@ PulleyCord::PulleyCord(Vector2d position, double radius, Item* body1, Item* body
 
 void PulleyCord::setBody1(Object* body1)
 {
+  _lengthOfCord = 0;
   _length1 = 0;
   if(body1)
   {
@@ -73,8 +75,8 @@ void PulleyCord::setBody1(Object* body1)
 	      _p1 = NULL;
 	      _r1 = static_cast<RigidBody*>(body1);
 	      Vector2d dc1 = position1() - end1;
-	      _lengthOfCord += dc1.norm();
 	      _length1 = dc1.norm();
+	      _lengthOfCord = _length1 + _length2;
 	      return;
 	    }
   }
@@ -85,6 +87,7 @@ void PulleyCord::setBody1(Object* body1)
 
 void PulleyCord::setBody2(Object* body2)
 {
+  _lengthOfCord = 0;
   _length2 = 0;
   if(body2)
   {
@@ -101,9 +104,9 @@ void PulleyCord::setBody2(Object* body2)
 		  _body2 = body2;
 		  _p2 = NULL;
 		  _r2 = static_cast<RigidBody*>(body2);
-		  Vector2d dc2 = position2() - end2;
-		  _lengthOfCord += dc2.norm(); 
+		  Vector2d dc2 = position2() - end2; 
 		  _length2 = dc2.norm();
+		  _lengthOfCord = _length1 + _length2;
 		  return;
 		}
   }
@@ -117,8 +120,6 @@ int PulleyCord::constraintsCount()
 {
   if(_body1 && _body2)
   {
-    Vector2d uA = position1() - end1;
-    Vector2d uB = position2() - end2;
     return 1;
   }
   
