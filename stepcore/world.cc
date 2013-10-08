@@ -36,9 +36,6 @@ STEPCORE_META_OBJECT(Tool, QT_TRANSLATE_NOOP("ObjectClass", "Tool"), QT_TR_NOOP(
 
 STEPCORE_META_OBJECT(ObjectErrors, QT_TRANSLATE_NOOP("ObjectClass", "ObjectErrors"), QT_TR_NOOP("ObjectErrors"), MetaObject::ABSTRACT, STEPCORE_SUPER_CLASS(Object),)
 
-STEPCORE_META_OBJECT(FrictionForce, QT_TRANSLATE_NOOP("ObjectClass", "FrictionForce"), QT_TR_NOOP("FrictionForce"), MetaObject::ABSTRACT, 
-		      STEPCORE_SUPER_CLASS(Object),)
-
 STEPCORE_META_OBJECT(ItemGroup, QT_TRANSLATE_NOOP("ObjectClass", "ItemGroup"), QT_TR_NOOP("ItemGroup"), 0, STEPCORE_SUPER_CLASS(Item),)
 
 STEPCORE_META_OBJECT(World, QT_TRANSLATE_NOOP("ObjectClass", "World"), QT_TR_NOOP("World"), 0, STEPCORE_SUPER_CLASS(ItemGroup),
