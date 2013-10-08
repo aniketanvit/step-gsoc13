@@ -1,3 +1,21 @@
+/* This file is part of Step.
+ * Copyright (C) 2013 Aniket Anvit <seeanvit@gmail.com>
+ * 
+ * Step is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * Step is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with Step; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 #include <KLocale>
 #include "frictionforce.h"
 #include "worldgraphics.h"
@@ -75,7 +93,7 @@ using namespace StepCore;
  }
 
  bool FrictionForceMenuHandler::fillValues()
- {std::cout<<"filling values"<<std::endl;
+ {
    double f = _createFrictionForceUi->_frictionLineEdit->text().toDouble();
    double r = _createFrictionForceUi->_restitutionLineEdit->text().toDouble();
   
@@ -88,9 +106,8 @@ using namespace StepCore;
    StepCore::ContactValueList::iterator it_begin = cs->_contacts.begin();
    
    for(it_begin; it_begin != it_end; it_begin++)
-   {std::cout<<"in outer loop"<<std::endl;
+   {
      if((_b1->variablesOffset() == (*it_begin).body0->variablesOffset()) || (_b1->variablesOffset() == (*it_begin).body1->variablesOffset())){
-       std::cout<<" one body present in this contact"<<_b1->variablesOffset()<<std::endl;
        if((_b2->variablesOffset() == (*it_begin).body0->variablesOffset()) || (_b2->variablesOffset() == (*it_begin).body0->variablesOffset()))
        {
 	 QPair<int, int> keyPair1 = qMakePair(_b1->variablesOffset(), _b2->variablesOffset());
@@ -100,22 +117,10 @@ using namespace StepCore;
 	 //(*it_begin).setr(r);
 	 _worldModel->world()->collisionSolver()->fhash.insert(keyPair1, valuePair);
 	 _worldModel->world()->collisionSolver()->fhash.insert(keyPair2, valuePair);
-	 std::cout<<"second body also present"<<_b1->variablesOffset() <<", "<<_b2->variablesOffset()<<std::endl;
-	 std::cout<<f<<" , "<<r<<std::endl;
-	 std::cout<<(*it_begin)._frictionCoefficient<<","<<(*it_begin)._restitutionCoefficient<<std::endl;
        }
        
     }
    }
    return true;
-   
-   
  }
- 
- 
- 
- 
- 
- 
- 
  

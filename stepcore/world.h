@@ -30,7 +30,6 @@
 
 #include <vector> // XXX: replace if QT is enabled
 #include <QHash>
-#include <QPair>
 
 // TODO: split this file
 
@@ -43,7 +42,6 @@ class Item;
 class ItemGroup;
 class CollisionSolver;
 class ConstraintSolver;
-class RigidBody;
 
 /** \ingroup errors
  *  \brief Base class for all errors objects
@@ -144,10 +142,9 @@ class Body
 public:
     Body(): _variablesOffset(0) {}
     virtual ~Body() {}
-    
+
     /** Get count of dynamic variables (not including velocities) */
     virtual int  variablesCount() = 0;
-    virtual Vector2d force() = 0;
 
     /** Set positions, velocities and (possibly) its variances using values in arrays and
      *  also reset accelerations and its variances. Variances should only be copied
@@ -212,19 +209,6 @@ public:
     virtual void calcForce(bool calcVariances) = 0;
 };
 
-class FrictionForce : public Object
-{
-  STEPCORE_OBJECT(FrictionForce)
-  
-public:
-  
-  FrictionForce();
-  ~FrictionForce();
-  
- // static QHash<QPair<Body*, Body*>, QPair<double, double> > _frictionHash;
-};
-
-//QHash< QPair<Body*, Body*>, QPair<double, double> > _frictionHash;
 /** \ingroup joints
  *  Constraints information structure
  *  XXX: Move it to constraintsolver.h
@@ -481,7 +465,7 @@ public:
     /** Set evolveAbort flag (can be called from separate thread). When the flag is set
      *  current (or any subsequent) doEvolve operation will be aborted as soon as possible. */
     void setEvolveAbort(bool evolveAbort = true) { _evolveAbort = evolveAbort; }
-    
+
 private:
     friend class ItemGroup;
 

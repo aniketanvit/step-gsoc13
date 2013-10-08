@@ -96,10 +96,6 @@ WorldFactory::WorldFactory()
     #define __REGISTER_EXT_E(Class, GraphicsCreator, GraphicsItem, ItemMenuHandler) \
         __REGISTER_EXT(Class, GraphicsCreator, GraphicsItem, ItemMenuHandler); \
         registerMetaObject(StepCore::Class##Errors::staticMetaObject())
-        
-            #define __REGISTER_EXT_F(class, GraphicsCreator, ItemMenuHandler) \
-            __REGISTER_EXT(class, GraphicsCreator, NULL, ItemMenuHandler) 
-            
 
     #define __ADD_TO_PALETTE(Class) \
         _paletteMetaObjects.push_back(QString(StepCore::Class::staticMetaObject()->className()))
@@ -137,7 +133,6 @@ WorldFactory::WorldFactory()
     __REGISTER_EXT(LinearMotor, LinearMotorCreator, LinearMotorGraphicsItem, ItemMenuHandler);
     __REGISTER_EXT(CircularMotor, CircularMotorCreator, CircularMotorGraphicsItem, ItemMenuHandler);
 
-    
     __REGISTER_E(WeightForce);
     __REGISTER_E(GravitationForce);
     __REGISTER_E(CoulombForce);

@@ -20,13 +20,9 @@
 #include "solver.h"
 #include "collisionsolver.h"
 #include "constraintsolver.h"
-#include "rigidbody.h"
-#include "particle.h"
 #include <algorithm>
 #include <cmath>
 #include <QtGlobal>
-#include <QDebug>
-#include <QPair>
 
 namespace StepCore
 {
@@ -39,9 +35,6 @@ STEPCORE_META_OBJECT(Joint, QT_TRANSLATE_NOOP("ObjectClass", "Joint"), QT_TR_NOO
 STEPCORE_META_OBJECT(Tool, QT_TRANSLATE_NOOP("ObjectClass", "Tool"), QT_TR_NOOP("Tool"), MetaObject::ABSTRACT,,)
 
 STEPCORE_META_OBJECT(ObjectErrors, QT_TRANSLATE_NOOP("ObjectClass", "ObjectErrors"), QT_TR_NOOP("ObjectErrors"), MetaObject::ABSTRACT, STEPCORE_SUPER_CLASS(Object),)
-
-STEPCORE_META_OBJECT(FrictionForce, QT_TRANSLATE_NOOP("ObjectClass", "FrictionForce"), QT_TR_NOOP("FrictionForce"), MetaObject::ABSTRACT, 
-		      STEPCORE_SUPER_CLASS(Object),)
 
 STEPCORE_META_OBJECT(ItemGroup, QT_TRANSLATE_NOOP("ObjectClass", "ItemGroup"), QT_TR_NOOP("ItemGroup"), 0, STEPCORE_SUPER_CLASS(Item),)
 
@@ -225,7 +218,7 @@ void ConstraintsInfo::setDimension(int newVariablesCount, int newConstraintsCoun
 //     std::cerr << "   ConstraintsInfo::setDimension("
 //       << newVariablesCount <<","<< newConstraintsCount <<"," << newContactsCount << ")\n";
     
-    int totalConstraintsCount = newConstraintsCount+(2*newContactsCount);
+    int totalConstraintsCount = newConstraintsCount+newContactsCount;
 
     jacobian.resize(totalConstraintsCount, newVariablesCount);
     jacobianDerivative.resize(totalConstraintsCount, newVariablesCount);
@@ -756,7 +749,7 @@ int World::doEvolve(double delta)
 
                 ret = _solver->doEvolve(&time, endTime, &_variables,
                             _errorsCalculation ? &_variances : NULL);
-                std::cout<<"inside the do-while loop"<<std::endl;
+                
                 _time = time;
 
                 if(ret == Solver::IntersectionDetected || ret == Solver::CollisionDetected) {
@@ -808,11 +801,9 @@ int World::doEvolve(double delta)
                         // XXX: variances
                         _constraintsInfo.velocity += _constraintsInfo.inverseMass.asDiagonal() * _constraintsInfo.force;
                     }
-                } 
-                else
-		  goto out;
+                } else goto out;
 
-            }  while(_time + stepSize/100 <= collisionEndTime); // XXX
+            } while(_time + stepSize/100 <= collisionEndTime); // XXX
         } else if(ret != Solver::OK) goto out;
     }
 
@@ -822,95 +813,96 @@ out:
 }
 
 inline int World::solverFunction(double t, const double* y,
-				 const double* yvar, double* f, double* fvar)
+                    const double* yvar, double* f, double* fvar)
 {
-  if(_evolveAbort) return Solver::Aborted;
-  
-  _time = t;
-  scatterVariables(y, yvar); // this will reset force
-  
-  // 1. Forces
-  bool calcVariances = (fvar != NULL);
-  const ForceList::const_iterator f_end = _forces.end();
-  for(ForceList::iterator force = _forces.begin(); force != f_end; ++force) {
-    (*force)->calcForce(calcVariances);
-  }
+    if(_evolveAbort) return Solver::Aborted;
+
+    _time = t;
+    scatterVariables(y, yvar); // this will reset force
+
+    // 1. Forces
+    bool calcVariances = (fvar != NULL);
+    const ForceList::const_iterator f_end = _forces.end();
+    for(ForceList::iterator force = _forces.begin(); force != f_end; ++force) {
+        (*force)->calcForce(calcVariances);
+    }
+    
+    std::memcpy(f, y+_variablesCount, _variablesCount*sizeof(*f));
+    if(fvar) std::memcpy(fvar, y+_variablesCount, _variablesCount*sizeof(*fvar));
+    gatherAccelerations(f+_variablesCount, fvar ? fvar+_variablesCount : NULL);
+    
+    if (_constraintSolver)
+    {
+      // setup...
       
-          std::memcpy(f, y+_variablesCount, _variablesCount*sizeof(*f));
-	  if(fvar) std::memcpy(fvar, y+_variablesCount, _variablesCount*sizeof(*fvar));
-	  gatherAccelerations(f+_variablesCount, fvar ? fvar+_variablesCount : NULL);
-	  
-	  if (_constraintSolver)
-	  {
-	    // setup...
-	    
-	    // check contacts
-	    int state = 0;
-	    if(_collisionSolver) {
-	      int contactsCount = 0;
-	      state = _collisionSolver->checkContacts(_bodies, false, &contactsCount);
-	      
-	      if (contactsCount!=_constraintsInfo.contactsCount)
-	      {
-		_constraintsInfo.setDimension(_constraintsInfo.variablesCount,
-					      _constraintsInfo.constraintsCount,
-				contactsCount);
-	      }
-	    }
-	    
-	          if(_variablesCount>0)
-		  {
-		    ::new (&_constraintsInfo.position) MappedVector(y, _variablesCount);
-		    ::new (&_constraintsInfo.velocity) MappedVector(y+_variablesCount, _variablesCount);
-		    ::new (&_constraintsInfo.acceleration) MappedVector(f+_variablesCount, _variablesCount);
-		  }
-		  
-		        // end sparse matrix assembly
-		              
-		                    // 2. Joints
-		                          gatherJointsInfo(&_constraintsInfo);
-					  
-					  // 3. Collisions (TODO: variances for collisions)
-					  if(_collisionSolver) {
-					    _collisionSolver->getContactsInfo(_constraintsInfo, false);
-					    if(state == Contact::Intersected) {
-					      if(_stopOnIntersection) return Solver::IntersectionDetected;
-					    } else {
-					      if(state == Contact::Colliding) {
-						if(_stopOnCollision) return Solver::CollisionDetected;
-						// XXX: We are not stopping on colliding contact
-						// and resolving them only at the end of timestep
-						// XXX: is it right solution ? Shouldn't we try to find
-						// contact point more exactly for example using binary search ?
-						//_collisionTime = t;
-						//_collisionTime = t;
-						//if(t < _collisionExpectedTime)
-						//    return DantzigLCPCollisionSolver::CollisionDetected;
-					      } else if(state >= CollisionSolver::InternalError) {
-						return state;
-					      }
-					    }
-					  }
-					        // end sparse matrix assembly
-					        
-					              // 4. Solve constraints
-					                    if(_constraintsInfo.constraintsCount + _constraintsInfo.contactsCount > 0) {
-							      
-							      int state = _constraintSolver->solve(&_constraintsInfo);
-							      if(state != Solver::OK) return state;
-						     
-						     int offset = 0;
-						     const BodyList::const_iterator b_end = _bodies.end();
-						     for(BodyList::iterator body = _bodies.begin(); body != b_end; ++body) {
-						       (*body)->addForce(&_constraintsInfo.force[offset], NULL);
-						       (*body)->getAccelerations(f+_variablesCount+offset, NULL);
-						       offset += (*body)->variablesCount();
-						     }
-							    }
-	  }
-	  
-	      return 0;
+      // check contacts
+      int state = 0;
+      if(_collisionSolver) {
+          int contactsCount = 0;
+          state = _collisionSolver->checkContacts(_bodies, false, &contactsCount);
+          
+          if (contactsCount!=_constraintsInfo.contactsCount)
+          {
+            _constraintsInfo.setDimension(_constraintsInfo.variablesCount,
+                                          _constraintsInfo.constraintsCount,
+                                          contactsCount);
+          }
+      }
+
+      if(_variablesCount>0)
+      {
+        ::new (&_constraintsInfo.position) MappedVector(y, _variablesCount);
+        ::new (&_constraintsInfo.velocity) MappedVector(y+_variablesCount, _variablesCount);
+        ::new (&_constraintsInfo.acceleration) MappedVector(f+_variablesCount, _variablesCount);
+      }
+
+      // end sparse matrix assembly
+      
+      // 2. Joints
+      gatherJointsInfo(&_constraintsInfo);
+
+      // 3. Collisions (TODO: variances for collisions)
+      if(_collisionSolver) {
+          _collisionSolver->getContactsInfo(_constraintsInfo, false);
+          if(state == Contact::Intersected) {
+              if(_stopOnIntersection) return Solver::IntersectionDetected;
+          } else {
+              if(state == Contact::Colliding) {
+                  if(_stopOnCollision) return Solver::CollisionDetected;
+                  // XXX: We are not stopping on colliding contact
+                  // and resolving them only at the end of timestep
+                  // XXX: is it right solution ? Shouldn't we try to find
+                  // contact point more exactly for example using binary search ?
+                  //_collisionTime = t;
+                  //_collisionTime = t;
+                  //if(t < _collisionExpectedTime)
+                  //    return DantzigLCPCollisionSolver::CollisionDetected;
+              } else if(state >= CollisionSolver::InternalError) {
+                  return state;
+              }
+          }
+      }
+      // end sparse matrix assembly
+
+      // 4. Solve constraints
+      if(_constraintsInfo.constraintsCount + _constraintsInfo.contactsCount > 0) {
+
+          int state = _constraintSolver->solve(&_constraintsInfo);
+          if(state != Solver::OK) return state;
+
+          int offset = 0;
+          const BodyList::const_iterator b_end = _bodies.end();
+          for(BodyList::iterator body = _bodies.begin(); body != b_end; ++body) {
+              (*body)->addForce(&_constraintsInfo.force[offset], NULL);
+              (*body)->getAccelerations(f+_variablesCount+offset, NULL);
+              offset += (*body)->variablesCount();
+          }
+      }
+    }
+
+    return 0;
 }
+
 int World::solverFunction(double t, const double* y,
                 const double* yvar, double* f, double* fvar, void* params)
 {
