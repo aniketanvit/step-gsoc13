@@ -20,8 +20,6 @@
 #include "solver.h"
 #include "collisionsolver.h"
 #include "constraintsolver.h"
-#include "rigidbody.h"
-#include "particle.h"
 #include <algorithm>
 #include <cmath>
 #include <QtGlobal>
@@ -37,9 +35,6 @@ STEPCORE_META_OBJECT(Joint, QT_TRANSLATE_NOOP("ObjectClass", "Joint"), QT_TR_NOO
 STEPCORE_META_OBJECT(Tool, QT_TRANSLATE_NOOP("ObjectClass", "Tool"), QT_TR_NOOP("Tool"), MetaObject::ABSTRACT,,)
 
 STEPCORE_META_OBJECT(ObjectErrors, QT_TRANSLATE_NOOP("ObjectClass", "ObjectErrors"), QT_TR_NOOP("ObjectErrors"), MetaObject::ABSTRACT, STEPCORE_SUPER_CLASS(Object),)
-
-STEPCORE_META_OBJECT(FrictionForce, QT_TRANSLATE_NOOP("ObjectClass", "FrictionForce"), QT_TR_NOOP("FrictionForce"), MetaObject::ABSTRACT, 
-		      STEPCORE_SUPER_CLASS(Object),)
 
 STEPCORE_META_OBJECT(ItemGroup, QT_TRANSLATE_NOOP("ObjectClass", "ItemGroup"), QT_TR_NOOP("ItemGroup"), 0, STEPCORE_SUPER_CLASS(Item),)
 
